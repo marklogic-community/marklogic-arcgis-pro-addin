@@ -1,0 +1,113 @@
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.SearchDockPaneView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:AddIn="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
+             xmlns:controls="clr-namespace:ArcGIS.Desktop.Framework.Controls;assembly=ArcGIS.Desktop.Framework"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="416.197" d:DesignWidth="300"
+             d:DataContext="{Binding Path=SearchDockPaneViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+            <AddIn:EnumToVisibilityConverter x:Key="EnumToVisibility" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="true" KeyboardNavigation.TabNavigation="Local">
+        <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoActiveMap}}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="No active map view"/>
+            </StackPanel>
+        </Grid>
+        <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoRegisteredServers}}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                <TextBlock Margin="15,1,15,0" Style="{DynamicResource Esri_TextBlockRegular}" Text="No registered MarkLogic servers found.  Go to your MarLogic Application Settings in Project Options to add a MarkLogic server." TextWrapping="Wrap"/>
+            </StackPanel>
+        </Grid>
+        <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoConnection}}">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="Connect to a MarkLogic server"/>
+                <ComboBox Margin="5" ItemsSource="{Binding ConnectionProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding ConnectionProfile}"></ComboBox>
+                <Button Margin="5" Width="80" Style="{DynamicResource Esri_Button}" Command="{Binding DiscoverCommand}">Connect</Button>
+            </StackPanel>
+        </Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.HasConnection}}">
+            <StackPanel>
+                <Expander Header="Search" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
+                    <!--StackPanel Visibility="{Binding HasSelectedSearchServiceProfile, Converter={StaticResource BooleanToVisibility}}"-->
+                    <StackPanel>
+                        <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Command="{Binding DisconnectCommand}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="Disconnect from MarkLogic">
+                                <Image Source="Images/Disconnect_16x.png" Width="16" Height="24" />
+                            </Button>
+                            <ComboBox DockPanel.Dock="Right" SelectionChanged="FeatureServers_SelectionChanged" ItemsSource="{Binding FeatureServers}" SelectedItem="{Binding SelectedFeatureServer}" DisplayMemberPath="Name"/>
+                        </DockPanel>
+                        <DockPanel Margin="5,5,5,0" LastChildFill="True">
+                            <Button Click="SearchInfoButton_Click" IsEnabled="{Binding HasQueryOptions}" DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="View search information">
+                                <Image Source="Images/StatusInformation_16x.png" Width="16" Height="24">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="True">
+                                                    <Setter Property="Opacity" Value="1.0"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </Button>
+                            <ComboBox IsEnabled="{Binding HasSelectedFeatureServer}" DockPanel.Dock="Right" ItemsSource="{Binding SearchServiceProfiles}" SelectedItem="{Binding SelectedSearchServiceProfile}" DisplayMemberPath="Name"/>
+                        </DockPanel>
+                        <DockPanel Margin="5,5,5,0" LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" Width="24" Height="24" BorderThickness="0" Click="SaveButton_Click" IsEnabled="{Binding Path=HasResults, Mode=OneWay}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" MinWidth="24" MinHeight="24" Padding="0" ToolTip="Save current search to a feature layer">
+                                <Image Source="Images/Save_16x.png" Width="16" Height="24">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="True">
+                                                    <Setter Property="Opacity" Value="1.0"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </Button>
+                            <controls:SearchTextBox IsEnabled="{Binding CanSearch}" Text="{Binding QueryString, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Search">
+                                        <i:InvokeCommandAction Command="{Binding SearchCommand}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="TextChanged">
+                                        <i:InvokeCommandAction Command="{Binding SuggestCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <controls:SearchTextBox.SuggestionItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock x:Name="DataItem" Text="{Binding}"/>
+                                    </DataTemplate>
+                                </controls:SearchTextBox.SuggestionItemTemplate>
+                            </controls:SearchTextBox>
+                        </DockPanel>
+                        <TextBlock Margin="5,2,5,0" Text="{Binding Path=QueryResultsSummary, Mode=OneWay}" Name="txtResultSummary" Style="{DynamicResource Esri_TextBlockRegular}"/>
+                    </StackPanel>
+                </Expander>
+                <Expander Header="Facets" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
+                    <AddIn:FacetsPanel Margin="5,0,5,0" Facets="{Binding Facets}" SelectFacet="{Binding SelectFacetCommand}" />
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

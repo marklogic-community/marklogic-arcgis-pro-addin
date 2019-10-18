@@ -1,0 +1,9 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MarkLogic.Esri.ArcGISPro.AddIn" GeneratedClassName="AppSettings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ConnectionProfiles" Type="MarkLogic.Esri.ArcGISPro.AddIn.Settings.ConnectionProfileList" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
