@@ -183,10 +183,10 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
                 return new GeospatialBox()
                 {
-                    North = wgsEnvelope.YMax,
-                    South = wgsEnvelope.YMin,
-                    West = wgsEnvelope.XMin,
-                    East = wgsEnvelope.XMax
+                    North = Math.Min(wgsEnvelope.YMax, 90.0), // north up to +90 deg
+                    South = Math.Max(wgsEnvelope.YMin, -90.0), // south up to -90 deg
+                    West = Math.Max(wgsEnvelope.XMin, -180.0), // west up to -180 deg
+                    East = Math.Min(wgsEnvelope.XMax, 180.0) // east up to +180 deg
                 };
             });
         }
