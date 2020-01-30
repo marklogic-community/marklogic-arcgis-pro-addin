@@ -67,7 +67,7 @@ This solution has the following external dependencies:
 - .NET Framework 4.6.1
 - The `marklogic-ui` server running on `http://esri-koop.demo.marklogic.com:8099`.
 
-Download and install [Visual Studio 2017](https://www.visualstudio.com/vs/community/) (Community or higher edition).
+Download and install [Visual Studio 2019](https://www.visualstudio.com/vs/community/) (Community or higher edition).
 Ensure that at least the **.NET desktop development** workload is selected when choosing your installation configuration.
 
 Install both [ArcGIS Pro SDK for .NET](https://github.com/Esri/arcgis-pro-sdk/wiki/ProGuide-Installation-and-Upgrade)
@@ -88,7 +88,7 @@ Under the `Build` menu, select `Rebuild Solution`.
 
 ### Testing it out
 
-To use the add-in you must have a valid installation of [ArcGIS Pro](https://pro.arcgis.com) of at least version 2.1.
+To use the add-in you must have a valid installation of [ArcGIS Pro](https://pro.arcgis.com) of at least version 2.4.
 
 Building the solution automatically registers the add-in on your local ArcGIS Pro application.
 
@@ -96,7 +96,7 @@ You can run ArcGIS Pro normally or start it via debugging `Debug -> Start Debugg
 
 Create a new project in ArcGIS Pro.  If the project has no map, add a new map.
 
-Open the `MarkLogic` ribbon tab and click on `Search`.  This will open a new dock pane (to the right by default).
+Open the `Add-In` ribbon tab located at the top of the application and click on `Search`.  This will open a new dock pane called `MarkLogic Search` (to the right by default).
 
 Enter a query in the search box, for example `ISIS or ISIL`.
 
@@ -108,6 +108,16 @@ Type in a layer name under `Save to New Layer` and press `Save`.  This will save
 ### Release
 
 Build the solution using the `Release` configuration.
+
+### Notes on Debugging
+
+Sometimes you wish to inspect the HTTP requests the add-in makes while debugging.  Web debugging proxy tools like [Telerik Fiddler](https://www.telerik.com/fiddler) are useful
+in this situation, but won't always work with .NET apps ([read here](https://docs.telerik.com/fiddler/Configure-Fiddler/Tasks/ConfigureDotNETApp)) without making application or 
+machine-level configuration changes.  This usually happens if the app is executed using an account different from the current user, which applies to the add-in.  Regardless of 
+other settings, .NET will generally bypass proxies if the URL has `localhost`.
+
+To enable the web proxy to intercept the add-in's requests, the best workaround (with least system impact) is to use your local computer's name in lieu of `localhost` as **host**
+when registering your MarkLogic app server in the add-in.
 
 
 
