@@ -64,7 +64,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 DocumentUri = documentUri;
                 FormattedContent = document.RawContent;
             }
-            catch (AuthorizationRequiredException e)
+            catch (Exception e)
             {
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
             }
