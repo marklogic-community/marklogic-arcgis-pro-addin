@@ -160,10 +160,19 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         private async void GetQueryOptions()
         {
             if (_queryOptions == null && HasSelectedSearchServiceProfile)
-                _queryOptions = await SearchService.Instance.ConfigQuery(_conn, SelectedSearchServiceProfile.SearchOptions);
-
-            NotifyPropertyChanged(() => HasQueryOptions);
-            NotifyPropertyChanged(() => QueryOptions);
+            {
+                try
+                {
+                    _queryOptions = await SearchService.Instance.ConfigQuery(_conn, SelectedSearchServiceProfile.SearchOptions);
+                    NotifyPropertyChanged(() => HasQueryOptions);
+                    NotifyPropertyChanged(() => QueryOptions);
+                }
+                catch (Exception e)
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            
         }
 
         private void AppendConstraint(object constraintName)
