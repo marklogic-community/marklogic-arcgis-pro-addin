@@ -92,5 +92,57 @@ namespace MarkLogic.Client.Search
         {
             get { return Math.Max(Total / PageLength, 1); }
         }
+
+        public IEnumerable<string> ValueNames => _response.Value<JObject>("values").Properties().Select(p => p.Name);
+
+        public IEnumerable<ValuePoint> GetValuePoints(string valueName)
+        {
+            var valueObject = _response.SelectToken("$.values." + valueName);
+            return valueObject.Value<JArray>("points").Select(obj => new ValuePoint()
+            {
+                Count = obj.Value<ulong>("count"),
+                Latitude = obj.Value<double>("lat"),
+                Longitude = obj.Value<double>("lon")
+            });
+        }
+
+        public IEnumerable<ValuePointCluster> GetValuePointClusters(string valueName)
+        {
+            var valueObject = _response.SelectToken("$.values." + valueName);
+            return valueObject.Value<JArray>("pointClusters").Select(obj => new ValuePointCluster()
+            {
+                Count = obj.Value<ulong>("count"),
+                South = obj.Value<double>("s"),
+                West = obj.Value<double>("w"),
+                North = obj.Value<double>("n"),
+                East = obj.Value<double>("e")
+            });
+        }
+    }
+
+    public class ValuePoint
+    {
+        public ulong Count { get; set; }
+
+        public double Latitude { get; set; }
+
+        public double Longitude { get; set; }
+    }
+
+    public class ValuePointCluster
+    {
+        public ulong Count { get; set; }
+
+        public double South { get; set; }
+
+        public double West { get; set; }
+
+        public double North { get; set; }
+
+        public double East { get; set; }
+
+        public double Latitude => ((North - South) / 2) + North;
+
+        public double Longitude => ((East - West) / 2) + West;
     }
 }

@@ -116,10 +116,12 @@
     <Compile Include="Connection\Extensions\Koop\FeatureLayerItem.cs" />
     <Compile Include="Connection\Extensions\Koop\FeatureLayerResults.cs" />
     <Compile Include="Connection\Extensions\Koop\FeatureServerProfile.cs" />
+    <Compile Include="Connection\Extensions\Koop\IServiceModel.cs" />
     <Compile Include="Connection\Extensions\Koop\SearchServicesResults.cs" />
     <Compile Include="Connection\Extensions\Koop\KoopService.cs" />
     <Compile Include="Connection\Extensions\Koop\SearchServiceProfile.cs" />
     <Compile Include="Connection\Extensions\Koop\CreateFeatureLayerOptions.cs" />
+    <Compile Include="Connection\Extensions\Koop\ServiceModel.cs" />
     <Compile Include="DocumentPanel.xaml.cs">
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>

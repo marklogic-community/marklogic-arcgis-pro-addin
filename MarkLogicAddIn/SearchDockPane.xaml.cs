@@ -81,11 +81,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             var viewModel = (SearchDockPaneViewModel)DataContext;
 
             Debug.Assert(viewModel != null);
-            Debug.Assert(viewModel.HasSelectedSearchServiceProfile);
+            Debug.Assert(viewModel.HasSelectedServiceModel);
 
             var saveSearchViewModel = new SaveSearchViewModel();
             saveSearchViewModel.Connection = viewModel.Connection;
-            saveSearchViewModel.ServiceName = viewModel.SelectedSearchServiceProfile.ServiceName;
+            //saveSearchViewModel.ServiceName = viewModel.SelectedSearchServiceProfile.ServiceName; TODO: replace
 
             SaveSearchWindow dlg = new SaveSearchWindow();
             dlg.DataContext = saveSearchViewModel;
@@ -101,31 +101,34 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             var viewModel = (SearchDockPaneViewModel)DataContext;
 
             Debug.Assert(viewModel != null);
-            Debug.Assert(viewModel.HasQueryOptions);
+            //Debug.Assert(viewModel.HasQueryOptions); TODO: replace
 
             var model = new SearchInfoModel();
-            model.Initialize(viewModel.QueryOptions, viewModel);
+            //model.Initialize(viewModel.QueryOptions, viewModel); TODO: replace
 
             var dlg = new SearchInfoWindow();
             dlg.DataContext = model;
             dlg.Show();
         }
 
-        private async void FeatureServers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ServiceModels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var featureServer = e.AddedItems.Count > 0 ? (FeatureServerProfile)e.AddedItems[0] : null;
-            if (featureServer == null)
+            /*var serviceModel = e.AddedItems.Count > 0 ? (ServiceModel)e.AddedItems[0] : null;
+            if (serviceModel == null)
                 return;
 
-            var layerExists = await FeatureLayerBuilder.Instance.GroupLayerExists(MapView.Active, featureServer.ServiceUrl);
+            // TODO: replace
+            var serviceUrl = $"http://localhost:8095/marklogic/{serviceModel.Id}/FeatureServer";
+
+            var layerExists = await FeatureLayerBuilder.Instance.GroupLayerExists(MapView.Active, serviceUrl);
             if (!layerExists)
             {
-                var result = ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show($"The feature service \"{featureServer.Name}\" will need to be added to save your searches.  Would you like to add it to your project now?", "MarkLogic", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                var result = ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show($"The feature service \"{serviceModel.Name}\" will need to be added to save your searches.  Would you like to add it to your project now?", "MarkLogic", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                 {
-                    await FeatureLayerBuilder.Instance.AddGroupLayer(MapView.Active, featureServer.Name, featureServer.ServiceUrl);
+                    await FeatureLayerBuilder.Instance.AddGroupLayer(MapView.Active, serviceModel.Name, serviceUrl);
                 }
-            }
+            }*/
         }
     }
 }

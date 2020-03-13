@@ -37,7 +37,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 _focusPoint = null;
         }
 
-        public async Task<bool> SetPoints(ValuesResults results)
+        public async Task<bool> SetPoints(SearchResults results, string valuesName)
         {
             var mapView = MapView.Active;
             if (mapView == null) return false;
@@ -49,19 +49,28 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 if (_symbol == null)
                     _symbol = SymbolFactory.Instance.ConstructPointSymbol(ColorFactory.Instance.RedRGB, 10.0, SimpleMarkerStyle.Circle).MakeSymbolReference();
 
-                foreach (var result in results)
+                var _symbolCluster = SymbolFactory.Instance.ConstructPointSymbol(ColorFactory.Instance.BlueRGB, 20.0, SimpleMarkerStyle.Circle).MakeSymbolReference();
+
+                foreach (var valuePoint in results.GetValuePoints(valuesName))
                 {
-                    var mapPoint = MapPointBuilder.CreateMapPoint(result.Long, result.Lat, SpatialReferences.WGS84);
-                    var overlayElem = this.MapView.AddOverlay(mapPoint, _symbol);
+                    var mapPoint = MapPointBuilder.CreateMapPoint(valuePoint.Longitude, valuePoint.Latitude, SpatialReferences.WGS84);
+                    var overlayElem = MapView.AddOverlay(mapPoint, _symbol);
+                    _overlayElements.Add(overlayElem);
+                }
+
+                foreach (var valuePointCluster in results.GetValuePointClusters(valuesName))
+                {
+                    var mapPoint = MapPointBuilder.CreateMapPoint(valuePointCluster.Longitude, valuePointCluster.Latitude, SpatialReferences.WGS84);
+                    var overlayElem = MapView.AddOverlay(mapPoint, _symbolCluster);
                     _overlayElements.Add(overlayElem);
                 }
             });
 
-            if (_focusPoint != null)
+            /*if (_focusPoint != null)
             {
                 _focusElement.Dispose();
                 await SelectPoint(_focusPoint.X, _focusPoint.Y);
-            }
+            }*/
 
             return true;
         }

@@ -14,7 +14,33 @@ namespace MarkLogic.Extensions.Koop
 {
     public class KoopService
     {
-        public static async Task<SearchServicesResults> SearchServices(Connection connection)
+        public static async Task<IEnumerable<IServiceModel>> GetServiceModels(Connection connection)
+        {
+            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/modelService", Query = "rs:filter=search" };
+            using (var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri))
+            {
+                using (var response = await connection.SendAsync(msg))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var json = (JObject)JsonConvert.DeserializeObject(responseContent);
+                        return json.Value<JArray>("models").Select(m => new ServiceModel(
+                            m.Value<string>("id"),
+                            m.Value<string>("name"),
+                            m.Value<string>("description"),
+                            m.Value<JArray>("search").Values<string>()));
+                    }
+                    catch(Exception e)
+                    {
+                        throw new InvalidOperationException("Failed to parse JSON for service models.");
+                    }
+                }
+            }
+        }
+
+        /*public static async Task<SearchServicesResults> SearchServices(Connection connection)
         {
             var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/KoopSearchServices" };
             using (var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri))
@@ -27,7 +53,7 @@ namespace MarkLogic.Extensions.Koop
                     return results;
                 }
             }
-        }
+        }*/
 
         private const string KoopFeatureLayerPath = "v1/resources/KoopFeatureLayer";
 

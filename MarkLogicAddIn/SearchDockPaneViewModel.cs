@@ -32,13 +32,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private Connection _conn;
         private SearchOptions _queryOptions;
-        private SearchServicesResults _discovery;
         private ObservableCollection<object> _searchSuggestions;
         private SearchResults _searchResults;
         private ValuesResults _valuesResults;
         private string _prevQueryString = "";
         private SearchQuery _prevQuery = null;
-        private string _prevSearchOptions = "";
         private HashSet<FacetValue> _selectedFacetValues = new HashSet<FacetValue>();
         private ICommand _cmdToRerun = null;
 
@@ -83,7 +81,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             if (!HasConnectionProfile)
                 return;
             _conn = null;
-            _discovery = null;
+            ServiceModels.Clear();
             _reqAuth = false;
             ConnectionProfile = null;
             ResolveState();
@@ -114,15 +112,10 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             try
             {
                 if (!EnsureHasConnection()) return;
-                _discovery = await KoopService.SearchServices(_conn);
-                if (_featureServers != null)
-                    _featureServers.Clear();
-                if (_searchServiceProfiles != null)
-                    _searchServiceProfiles.Clear();
-                foreach (var fs in _discovery.FeatureServers)
-                    _featureServers.Add(fs);
-                //if (SelectedSearchServiceProfile == null && _searchServiceProfiles.Count > 0)
-                //    SelectedSearchServiceProfile = _searchServiceProfiles[0];
+                ServiceModels.Clear();
+                foreach(var model in await KoopService.GetServiceModels(_conn)) {
+                    ServiceModels.Add(model);
+                }
             }
             catch (AuthorizationRequiredException e)
             {
@@ -135,9 +128,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             }
         }
 
-        private async Task<long> DoSearch(SearchQuery query, string searchOptions)
+        private long ProcessResults(SearchResults results)
         {
-            _searchResults = await SearchService.Instance.Search(_conn, query, searchOptions);
+            _searchResults = results;
             _searchResults.SelectedFacetValues.ToList().ForEach(v => _selectedFacetValues.Add(v));
             NotifyPropertyChanged(() => Facets);
             NotifyPropertyChanged(() => Results);
@@ -146,33 +139,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             return _searchResults.Total;
         }
 
-        private async Task<long> DoValues(SearchQuery query, string searchOptions, string valuesName)
+        private async Task<long> ProcessValues(SearchResults results)
         {
-            if (query.IsEmpty)
-                return 0;
-            _valuesResults = await SearchService.Instance.Values(_conn, query, searchOptions, valuesName);
             SaveToNewLayerCommand.RaiseCanExecuteChanged();
             Debug.Assert(MapView.Active != null); // there should be a check if the current pane is a map
-            await PointOverlay.SetPoints(_valuesResults);
-            return _valuesResults.Count;
-        }
-
-        private async void GetQueryOptions()
-        {
-            if (_queryOptions == null && HasSelectedSearchServiceProfile)
-            {
-                try
-                {
-                    _queryOptions = await SearchService.Instance.ConfigQuery(_conn, SelectedSearchServiceProfile.SearchOptions);
-                    NotifyPropertyChanged(() => HasQueryOptions);
-                    NotifyPropertyChanged(() => QueryOptions);
-                }
-                catch (Exception e)
-                {
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            
+            await PointOverlay.SetPoints(results, results.ValueNames.FirstOrDefault());
+            return results.Total;
         }
 
         private void AppendConstraint(object constraintName)
@@ -202,7 +174,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private void OnCameraChanged(MapViewCameraChangedEventArgs e)
         {
-            if (e.MapView == MapView.Active && HasSelectedSearchServiceProfile)
+            if (e.MapView == MapView.Active && HasSelectedServiceModel)
                 Search();
         }
 
@@ -228,7 +200,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             {
                 if (!EnsureHasConnection()) return;
 
-                if (!HasSelectedSearchServiceProfile) return;
+                if (!HasSelectedServiceModel) return;
 
                 IsSearching = true;
 
@@ -242,14 +214,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                     _selectedFacetValues.Clear(); // different query; clear previously selected facets
                 var query = new SearchQuery(QueryString, _selectedFacetValues);
 
-                var viewportBox = await GetViewportBox(MapView.Active);
-                var vq = new GeospatialConstraintQuery() { ConstraintName = SelectedSearchServiceProfile.GeoConstraint };
-                vq.Boxes.Add(viewportBox);
-                query.AdditionalQueries.Add(vq);
-
                 _prevQueryString = QueryString;
                 _prevQuery = query;
-                _prevSearchOptions = SelectedSearchServiceProfile.SearchOptions;
 
                 // prevent searching everything
                 if (query.IsEmpty)
@@ -260,12 +226,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
                 // run query
                 QueryResultsSummary = "Running query...";
-                var searchTask = DoSearch(query, SelectedSearchServiceProfile.SearchOptions);
-                var valuesTask = DoValues(query, SelectedSearchServiceProfile.SearchOptions, SelectedSearchServiceProfile.Values);
 
-                await Task.WhenAll(searchTask, valuesTask);
+                var searchResults = await SearchService.Instance.Search(Connection, query, SelectedServiceModel);
+                var resultsTotal = ProcessResults(searchResults);
+                var objectsTotal = await ProcessValues(searchResults);
 
-                QueryResultsSummary = $"Returned {searchTask.Result} results and {valuesTask.Result} distinct points.";
+                QueryResultsSummary = $"Returned {resultsTotal} results and {objectsTotal} objects.";
 
                 SearchResultsDockPaneViewModel.ShowResults(this);
             }
@@ -298,7 +264,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                     return; // already on first or last page
 
                 IsSearching = true;
-                var results = await SearchService.Instance.Search(_conn, _prevQuery, _prevSearchOptions, start);
+                var results = await SearchService.Instance.Search(_conn, _prevQuery, SelectedServiceModel, start);
                 _searchResults = results; // replace
 
                 NotifyPropertyChanged(() => Results);
@@ -322,13 +288,13 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             {
                 if (!EnsureHasConnection()) return;
 
-                if (!HasSelectedSearchServiceProfile) return;
+                if (!HasSelectedServiceModel) return;
 
                 var partialQ = QueryString;
-                var results = await SearchService.Instance.Suggest(_conn, partialQ, SelectedSearchServiceProfile.SearchOptions);
+                /*var results = await SearchService.Instance.Suggest(_conn, partialQ, SelectedSearchServiceProfile.SearchOptions); TODO: replace
                 _searchSuggestions.Clear();
                 foreach (var  suggestion in results.Suggestions)
-                    _searchSuggestions.Add(suggestion);
+                    _searchSuggestions.Add(suggestion); TODO: replace */
             }
             catch (AuthorizationRequiredException e)
             {
@@ -363,6 +329,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 throw new ArgumentException("searchResultObj must be of type SearchResult", "searchResultObj");
             try
             {
+                /* TODO: replace
                 var searchResult = (SearchResult)searchResultObj;
                 SearchResultsDockPaneViewModel.ShowDocument(ConnectionProfile, searchResult.Uri, SelectedSearchServiceProfile.DocTransform);
 
@@ -375,7 +342,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                     var point = values.FirstOrDefault();
                     Debug.Assert(point != null);
                     await PointOverlay.SelectPoint(point.Long, point.Lat);
-                }
+                }*/
             }
             catch(Exception e)
             {
@@ -414,16 +381,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 }
                 else if (saveOptions.Mode == SaveSearchMode.FeatureService)
                 {
-                    Debug.Assert(HasSelectedSearchServiceProfile);
+                    Debug.Assert(HasSelectedServiceModel);
 
                     var createOptions = new CreateFeatureLayerOptions()
                     {
                         LayerName = saveOptions.LayerName,
-                        LayerDescription = saveOptions.LayerDescription,
+                        LayerDescription = saveOptions.LayerDescription/*,
                         FeatureServiceName = SelectedSearchServiceProfile.ServiceName,
                         FeatureServiceSchema = SelectedSearchServiceProfile.Schema,
                         FeatureServiceView = SelectedSearchServiceProfile.View,
-                        SearchOptions = SelectedSearchServiceProfile.SearchOptions
+                        SearchOptions = SelectedSearchServiceProfile.SearchOptions*/
                     };
 
                     string layerId = saveOptions.Replace ? saveOptions.ReplaceLayerId : null;
@@ -552,74 +519,25 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public AuthorizationRequiredInfo RequiresAuthorizationInfo { get; private set; }
 
-        private ObservableCollection<FeatureServerProfile> _featureServers = new ObservableCollection<FeatureServerProfile>();
-        public ObservableCollection<FeatureServerProfile> FeatureServers => _featureServers;
+        public ObservableCollection<IServiceModel> ServiceModels { get; } = new ObservableCollection<IServiceModel>();
 
-        private FeatureServerProfile _selectedFeatureServer;
-        public FeatureServerProfile SelectedFeatureServer
+        private IServiceModel _selectedServiceModel;
+        public IServiceModel SelectedServiceModel
         {
-            get { return _selectedFeatureServer; }
+            get => _selectedServiceModel;
             set
             {
-                var prev = _selectedFeatureServer;
-
-                SetProperty(ref _selectedFeatureServer, value, () => SelectedFeatureServer);
-                NotifyPropertyChanged(() => HasSelectedFeatureServer);
-
-                if (value != prev)
-                {
-                    SearchServiceProfiles.Clear();
-                    SelectedSearchServiceProfile = null;
-                    if (value != null)
-                    {
-                        foreach (var ss in value.SearchServices)
-                            SearchServiceProfiles.Add(ss);
-                    }
-                }
-            }
-        }
-
-        public bool HasSelectedFeatureServer
-        {
-            get { return SelectedFeatureServer != null; }
-        }
-
-        private ObservableCollection<SearchServiceProfile> _searchServiceProfiles = new ObservableCollection<SearchServiceProfile>();
-        public ObservableCollection<SearchServiceProfile> SearchServiceProfiles => _searchServiceProfiles;
-
-        private SearchServiceProfile _selectedSearchServiceProfile;
-        public SearchServiceProfile SelectedSearchServiceProfile
-        {
-            get { return _selectedSearchServiceProfile; }
-            set
-            {
-                SetProperty(ref _selectedSearchServiceProfile, value, () => SelectedSearchServiceProfile);
-                NotifyPropertyChanged(() => HasSelectedSearchServiceProfile);
+                SetProperty(ref _selectedServiceModel, value, () => SelectedServiceModel);
+                NotifyPropertyChanged(() => HasSelectedServiceModel);
                 NotifyPropertyChanged(() => CanSearch);
-
-                _queryOptions = null; // reset
-                GetQueryOptions(); // start request
             }
         }
 
-        public bool HasSelectedSearchServiceProfile
-        {
-            get { return SelectedSearchServiceProfile != null; }
-        }
-
-        public bool HasQueryOptions
-        {
-            get { return _queryOptions != null; }
-        }
-
-        public SearchOptions QueryOptions
-        {
-            get { return _queryOptions; }
-        }
+        public bool HasSelectedServiceModel => SelectedServiceModel != null;
 
         public bool CanSearch
         {
-            get { return IsNotSearching && HasSelectedSearchServiceProfile; }
+            get { return IsNotSearching && HasSelectedServiceModel; }
         }
 
         private string _queryString;

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using MarkLogic.Extensions.Koop;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,19 +35,26 @@ namespace MarkLogic.Client.Search
             msg.Content = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
         }
         
-        public async Task<SearchResults> Search(Connection connection, SearchQuery query, string searchOptions, long start = 1)
+        public async Task<SearchResults> Search(Connection connection, SearchQuery query, IServiceModel serviceModel, long start = 1)
         {
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/search" };
-            ub.AddQueryParam("options", searchOptions);
-            ub.AddQueryParam("pageLength", DefaultPageLength);
-            ub.AddQueryParam("start", start);
-            ub.AddQueryParam("q", query.FullQuery);
+            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/geoSearchService" };
 
-            var hasPayload = RequiresPayload(query);
-            var msg = new HttpRequestMessage(hasPayload ? HttpMethod.Post : HttpMethod.Get, ub.Uri);
-            if (hasPayload)
-                PreparePayload(msg, query);
+            var inputParams = new JObject();
+            inputParams.Add("id", serviceModel.Id);
+            inputParams.Add("search", serviceModel.SearchProfileNames.FirstOrDefault()); // TODO: temporary
+            inputParams.Add("request", new JArray("results", "facets", "values"));
+            inputParams.Add("aggregateValues", true);
 
+            var inputSearch = new JObject();
+            inputSearch.Add("qtext", query.QueryText);
+
+            var input = new JObject();
+            input.Add("params", inputParams);
+            input.Add("search", inputSearch);
+
+            var msg = new HttpRequestMessage(HttpMethod.Post, ub.Uri);
+            msg.Content = new StringContent(input.ToString(), Encoding.UTF8, "application/json");
+            
             using (msg)
             {
                 using (var response = await connection.SendAsync(msg))
