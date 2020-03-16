@@ -1,4 +1,5 @@
-﻿using MarkLogic.Extensions.Koop;
+﻿using MarkLogic.Client.Search.Query;
+using MarkLogic.Extensions.Koop;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -41,12 +42,23 @@ namespace MarkLogic.Client.Search
 
             var inputParams = new JObject();
             inputParams.Add("id", serviceModel.Id);
-            inputParams.Add("search", serviceModel.SearchProfileNames.FirstOrDefault()); // TODO: temporary
             inputParams.Add("request", new JArray("results", "facets", "values"));
             inputParams.Add("aggregateValues", true);
 
+            var searchViewport = new JObject();
+            var viewport = query.Viewport ?? GeospatialBox.FullExtent;
+            var viewportBox = new JObject();
+            viewportBox.Add("s", viewport.South);
+            viewportBox.Add("w", viewport.West);
+            viewportBox.Add("n", viewport.North);
+            viewportBox.Add("e", viewport.East);
+            searchViewport.Add("box", viewportBox);
+            searchViewport.Add("maxLatDivs", 50); // TODO: should be user configurable
+            searchViewport.Add("maxLonDivs", 25);
+
             var inputSearch = new JObject();
             inputSearch.Add("qtext", query.QueryText);
+            inputSearch.Add("viewport", searchViewport);
 
             var input = new JObject();
             input.Add("params", inputParams);

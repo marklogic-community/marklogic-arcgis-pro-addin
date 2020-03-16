@@ -151,7 +151,7 @@
       <DependentUpon>FacetsPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Feature\FeatureLayerBuilder.cs" />
-    <Compile Include="Map\MapPointOverlay.cs" />
+    <Compile Include="Map\MapOverlayManager.cs" />
     <Compile Include="SearchDockPane.xaml.cs">
       <DependentUpon>SearchDockPane.xaml</DependentUpon>
     </Compile>

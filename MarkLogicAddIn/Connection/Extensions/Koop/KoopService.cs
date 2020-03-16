@@ -26,15 +26,14 @@ namespace MarkLogic.Extensions.Koop
                     try
                     {
                         var json = (JObject)JsonConvert.DeserializeObject(responseContent);
-                        return json.Value<JArray>("models").Select(m => new ServiceModel(
+                        return json.Value<JObject>("models").PropertyValues().Select(m => new ServiceModel(
                             m.Value<string>("id"),
                             m.Value<string>("name"),
-                            m.Value<string>("description"),
-                            m.Value<JArray>("search").Values<string>()));
+                            m.Value<string>("description")));
                     }
                     catch(Exception e)
                     {
-                        throw new InvalidOperationException("Failed to parse JSON for service models.");
+                        throw new InvalidOperationException("Failed to parse JSON for service models.", e);
                     }
                 }
             }

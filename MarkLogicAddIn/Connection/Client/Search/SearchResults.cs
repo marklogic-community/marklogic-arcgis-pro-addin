@@ -97,8 +97,10 @@ namespace MarkLogic.Client.Search
 
         public IEnumerable<ValuePoint> GetValuePoints(string valueName)
         {
-            var valueObject = _response.SelectToken("$.values." + valueName);
-            return valueObject.Value<JArray>("points").Select(obj => new ValuePoint()
+            var points = _response.SelectToken("$.values." + valueName + ".points");
+            if (points == null || points.Type != JTokenType.Array)
+                return new ValuePoint[0];
+            return (points as JArray).Select(obj => new ValuePoint()
             {
                 Count = obj.Value<ulong>("count"),
                 Latitude = obj.Value<double>("lat"),
@@ -108,8 +110,10 @@ namespace MarkLogic.Client.Search
 
         public IEnumerable<ValuePointCluster> GetValuePointClusters(string valueName)
         {
-            var valueObject = _response.SelectToken("$.values." + valueName);
-            return valueObject.Value<JArray>("pointClusters").Select(obj => new ValuePointCluster()
+            var pointClusters = _response.SelectToken("$.values." + valueName + ".pointClusters");
+            if (pointClusters == null || pointClusters.Type != JTokenType.Array)
+                return new ValuePointCluster[0];
+            return (pointClusters as JArray).Select(obj => new ValuePointCluster()
             {
                 Count = obj.Value<ulong>("count"),
                 South = obj.Value<double>("s"),
@@ -141,7 +145,7 @@ namespace MarkLogic.Client.Search
 
         public double East { get; set; }
 
-        public double Latitude => ((North - South) / 2) + North;
+        public double Latitude => ((North - South) / 2) + South;
 
         public double Longitude => ((East - West) / 2) + West;
     }

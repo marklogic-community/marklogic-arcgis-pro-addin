@@ -9,7 +9,5 @@ namespace MarkLogic.Extensions.Koop
         string Name { get; }
 
         string Description { get; }
-
-        IEnumerable<string> SearchProfileNames { get; }
     }
 }

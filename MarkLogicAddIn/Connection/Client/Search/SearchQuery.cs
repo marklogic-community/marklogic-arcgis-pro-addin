@@ -48,6 +48,9 @@ namespace MarkLogic.Client.Search
         }
 
         private List<StructuredQuery> _additionalQueries;
+        [Obsolete]
         public IList<StructuredQuery> AdditionalQueries => _additionalQueries ?? (_additionalQueries = new List<StructuredQuery>());
+
+        public GeospatialBox Viewport { get; set; }
     }
 }

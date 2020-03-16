@@ -40,8 +40,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         private HashSet<FacetValue> _selectedFacetValues = new HashSet<FacetValue>();
         private ICommand _cmdToRerun = null;
 
-        private MapPointOverlay _pointOverlay = null;
-        private MapPointOverlay PointOverlay => _pointOverlay ?? (_pointOverlay = new MapPointOverlay(MapView.Active));
+        private MapOverlayManager _mapOverlayManager = null;
+        private MapOverlayManager MapOverlayManager => _mapOverlayManager ?? (_mapOverlayManager = new MapOverlayManager(MapView.Active));
 
         protected SearchDockPaneViewModel()
         {
@@ -143,7 +143,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         {
             SaveToNewLayerCommand.RaiseCanExecuteChanged();
             Debug.Assert(MapView.Active != null); // there should be a check if the current pane is a map
-            await PointOverlay.SetPoints(results, results.ValueNames.FirstOrDefault());
+            await MapOverlayManager.ApplyResults(results);
             return results.Total;
         }
 
@@ -180,7 +180,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private void ResetSearch()
         {
-            PointOverlay.Clear(true);
+            MapOverlayManager.Clear();
             QueryString = "";
             _searchSuggestions.Clear();
             _selectedFacetValues.Clear();
@@ -206,23 +206,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
                 // clear
                 QueryResultsSummary = "";
-                PointOverlay.Clear();
                 _searchSuggestions.Clear();
 
                 // build query
                 if (_prevQueryString != QueryString)
                     _selectedFacetValues.Clear(); // different query; clear previously selected facets
                 var query = new SearchQuery(QueryString, _selectedFacetValues);
+                query.Viewport = await GetViewportBox(MapView.Active);
 
                 _prevQueryString = QueryString;
                 _prevQuery = query;
-
-                // prevent searching everything
-                if (query.IsEmpty)
-                {
-                    ResetSearch();
-                    return;
-                }
 
                 // run query
                 QueryResultsSummary = "Running query...";
