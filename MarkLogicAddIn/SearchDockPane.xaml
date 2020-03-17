@@ -31,20 +31,19 @@
             </StackPanel>
         </Grid>
         <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoConnection}}">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+            <StackPanel DataContext="{Binding Path=ConnectionViewModel}" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
                 <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="Connect to a MarkLogic server"/>
-                <ComboBox Margin="5" ItemsSource="{Binding ConnectionProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding ConnectionProfile}"></ComboBox>
-                <Button Margin="5" Width="80" Style="{DynamicResource Esri_Button}" Command="{Binding DiscoverCommand}">Connect</Button>
+                <ComboBox Margin="5" ItemsSource="{Binding ConnectionProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedConnectionProfile}"></ComboBox>
+                <Button Margin="5" Width="80" Style="{DynamicResource Esri_Button}" Command="{Binding GetServiceModels}">Connect</Button>
             </StackPanel>
         </Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.HasConnection}}">
             <StackPanel>
                 <Expander Header="Search" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
-                    <!--StackPanel Visibility="{Binding HasSelectedSearchServiceProfile, Converter={StaticResource BooleanToVisibility}}"-->
                     <StackPanel>
-                        <DockPanel Margin="5,0,5,0" LastChildFill="True">
-                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Command="{Binding DisconnectCommand}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="Disconnect from MarkLogic">
+                        <DockPanel DataContext="{Binding Path=ConnectionViewModel}" Margin="5,0,5,0" LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Command="{Binding ClearServiceModels}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="Disconnect from MarkLogic">
                                 <Image Source="Images/Disconnect_16x.png" Width="16" Height="24" />
                             </Button>
                             <ComboBox DockPanel.Dock="Right" SelectionChanged="ServiceModels_SelectionChanged" ItemsSource="{Binding ServiceModels}" SelectedItem="{Binding SelectedServiceModel}" DisplayMemberPath="Name"/>
@@ -85,10 +84,10 @@
                                     </Image.Style>
                                 </Image>
                             </Button>
-                            <controls:SearchTextBox IsEnabled="{Binding CanSearch}" Text="{Binding QueryString, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
+                            <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" Text="{Binding QueryViewModel.QueryString, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Search">
-                                        <i:InvokeCommandAction Command="{Binding SearchCommand}"/>
+                                        <i:InvokeCommandAction Command="{Binding QueryViewModel.Search}"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding SuggestCommand}"/>
@@ -101,7 +100,7 @@
                                 </controls:SearchTextBox.SuggestionItemTemplate>
                             </controls:SearchTextBox>
                         </DockPanel>
-                        <TextBlock Margin="5,2,5,0" Text="{Binding Path=QueryResultsSummary, Mode=OneWay}" Name="txtResultSummary" Style="{DynamicResource Esri_TextBlockRegular}"/>
+                        <TextBlock Margin="5,2,5,0" Text="{Binding Path=QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
                     </StackPanel>
                 </Expander>
                 <Expander Header="Facets" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">

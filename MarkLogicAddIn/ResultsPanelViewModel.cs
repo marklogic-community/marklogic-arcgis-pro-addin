@@ -24,15 +24,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             SetProperty(ref _searchViewModel, searchViewModel);
             searchViewModel.PropertyChanged += SearchViewModel_PropertyChanged;
             foreach(var prop in _props)
-                OnPropertyChanged(prop);
+                NotifyPropertyChanged(prop);
         }
 
         private void SearchViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (_props.Contains(e.PropertyName))
-                OnPropertyChanged(e.PropertyName);
+                NotifyPropertyChanged(e.PropertyName);
         }
-
+        /*
         public IEnumerable<SearchResult> Results => _searchViewModel != null ? _searchViewModel.Results : null;
 
         public long CurrentPage => _searchViewModel != null ? _searchViewModel.CurrentPage : 0;
@@ -43,6 +43,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public ICommand PagePrevResultsCommand => _searchViewModel != null ? _searchViewModel.PagePrevResultsCommand : null;
 
-        public ICommand PageNextResultsCommand => _searchViewModel != null ? _searchViewModel.PageNextResultsCommand : null;
+        public ICommand PageNextResultsCommand => _searchViewModel != null ? _searchViewModel.PageNextResultsCommand : null;*/
     }
 }

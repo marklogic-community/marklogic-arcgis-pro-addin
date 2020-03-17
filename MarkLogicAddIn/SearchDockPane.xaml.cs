@@ -31,10 +31,10 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public SearchDockPaneView()
         {
             InitializeComponent();
-            DataContextChanged += SearchDockPaneView_DataContextChanged;
+            //DataContextChanged += SearchDockPaneView_DataContextChanged;
         }
 
-        private void SearchDockPaneView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        /*private void SearchDockPaneView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue != null)
             {
@@ -74,11 +74,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 }
                 dlg.Close();
             });
-        }
+        }*/
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var viewModel = (SearchDockPaneViewModel)DataContext;
+            /*var viewModel = (SearchDockPaneViewModel)DataContext;
 
             Debug.Assert(viewModel != null);
             Debug.Assert(viewModel.HasSelectedServiceModel);
@@ -93,7 +93,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             dlg.Close();
 
             if (dlgResult.HasValue && dlgResult.Value == true)
-                viewModel.SaveToNewLayerCommand.Execute(dlg.DataContext as ISaveSearchOptions);
+                viewModel.SaveToNewLayerCommand.Execute(dlg.DataContext as ISaveSearchOptions);*/
         }
 
         private void SearchInfoButton_Click(object sender, RoutedEventArgs e)

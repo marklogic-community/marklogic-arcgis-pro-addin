@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
+    <Compile Include="SearchCommand.cs" />
     <Compile Include="Connection\Client\Document\Document.cs" />
     <Compile Include="Connection\Client\Document\DocumentService.cs" />
     <Compile Include="Connection\Client\Search\Query\ConstraintQuery.cs" />
@@ -127,6 +128,9 @@
     </Compile>
     <Compile Include="DocumentPanelViewModel.cs" />
     <Compile Include="DropDownButtonBehavior.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Messaging\Message.cs" />
+    <Compile Include="Messaging\MessageBus.cs" />
     <Compile Include="ResultsPanel.xaml.cs">
       <DependentUpon>ResultsPanel.xaml</DependentUpon>
     </Compile>
@@ -171,6 +175,12 @@
     </Compile>
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
     <Compile Include="ResultsPanelViewModel.cs" />
+    <Compile Include="ServerCommand.cs" />
+    <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
+    <Compile Include="ViewModels\Messages\ConnectionProfileChangedMessage.cs" />
+    <Compile Include="ViewModels\Messages\EndSearchMessage.cs" />
+    <Compile Include="ViewModels\Messages\ServiceModelChangedMessage.cs" />
+    <Compile Include="ViewModels\SearchConnectionViewModel.cs" />
     <Compile Include="Settings\ConnectionProfileList.cs" />
     <Compile Include="Settings\ServerDetailsWindow.xaml.cs">
       <DependentUpon>ServerDetailsWindow.xaml</DependentUpon>
@@ -180,6 +190,8 @@
     </Compile>
     <Compile Include="Settings\SettingsViewModel.cs" />
     <Compile Include="ViewModelBase.cs" />
+    <Compile Include="ViewModels\SearchFacetsViewModel.cs" />
+    <Compile Include="ViewModels\SearchQueryViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\GenericButtonPurple16.png" />

@@ -76,7 +76,7 @@ namespace MarkLogic.Client.Search
                     var results = new SearchResults(responseContent);
 
                     // set selected facets
-                    if (results.Facets.Count > 0)
+                    /*if (results.Facets.Count > 0)
                     {
                         var allFacetValues = results.Facets.Values.SelectMany(f => f.Values).ToArray();
 
@@ -94,7 +94,7 @@ namespace MarkLogic.Client.Search
                             if (facetValue.ContainsQueryString(query.FullQuery))
                                 facetValue.Selected = true;
                         }
-                    }
+                    }*/
                     return results;
                 }
             }
@@ -107,7 +107,7 @@ namespace MarkLogic.Client.Search
             var ub = new UriBuilder(connection.Profile.Uri) { Path = $"v1/values/{valuesName}" };
             ub.AddQueryParam("options", searchOptions);
             ub.AddQueryParam("limit", limit);
-            ub.AddQueryParam("q", query.FullQuery);
+            //ub.AddQueryParam("q", query.FullQuery);
 
             var hasPayload = RequiresPayload(query);
             var msg = new HttpRequestMessage(hasPayload ? HttpMethod.Post : HttpMethod.Get, ub.Uri);

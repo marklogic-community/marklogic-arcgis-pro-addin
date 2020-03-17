@@ -3,10 +3,10 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
@@ -14,28 +14,21 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
     public class MapOverlayManager
     {
         private List<IDisposable> _overlayElements = new List<IDisposable>();
-        /*
-        private CIMSymbolReference _focusSymbol = null;
-        private IDisposable _focusElement = null;
-        private MapPoint _focusPoint = null;
-        */
 
-        public MapOverlayManager(MapView mapView)
+        public MapOverlayManager(MessageBus messageBus)
         {
-            MapView = mapView ?? throw new ArgumentNullException("mapView");
+            MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<BeginSearchMessage>(m => Clear());
+            MessageBus.Subscribe<EndSearchMessage>(m => ApplyResults(m.Results));
         }
 
-        public MapView MapView { get; private set; }
+        private MessageBus MessageBus { get; set; }
 
-        public void Clear(bool clearFocus = false)
+        public void Clear()
         {
             foreach (var overlayElem in _overlayElements)
                 overlayElem.Dispose();
             _overlayElements.Clear();
-            /*if (_focusElement != null)
-                _focusElement.Dispose();
-            if (clearFocus)
-                _focusPoint = null;*/
         }
 
         // TODO: these should be exposed as user configurable options
@@ -77,7 +70,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                     foreach (var point in results.GetValuePoints(valueName))
                     {
                         var mapPoint = MapPointBuilder.CreateMapPoint(point.Longitude, point.Latitude, spatialRef);
-                        _overlayElements.Add(MapView.AddOverlay(mapPoint, pointSymbolRef));
+                        _overlayElements.Add(mapView.AddOverlay(mapPoint, pointSymbolRef));
                     }
                     
                     foreach (var pointCluster in results.GetValuePointClusters(valueName))
@@ -90,8 +83,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                         var multiplier = 1 + ((text.Length - 1) * 0.5); // increase size by 0.5 for every text digit
                         pointClusterSymbol.SetSize(baseSize * multiplier);
 
-                        _overlayElements.Add(MapView.AddOverlay(mapPoint, pointClusterSymbol.MakeSymbolReference()));
-                        _overlayElements.Add(MapView.AddOverlay(textGraphic));
+                        _overlayElements.Add(mapView.AddOverlay(mapPoint, pointClusterSymbol.MakeSymbolReference()));
+                        _overlayElements.Add(mapView.AddOverlay(textGraphic));
 
                         //_overlayElements.Add(MapView.AddOverlay(
                         //    EnvelopeBuilder.CreateEnvelope(pointCluster.West * 2.0, pointCluster.South * 2.0, pointCluster.East * 2.0, pointCluster.North * 2.0, spatialRef), 
@@ -99,12 +92,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                     }
                 }
             });
-
-            /*if (_focusPoint != null)
-            {
-                _focusElement.Dispose();
-                await SelectPoint(_focusPoint.X, _focusPoint.Y);
-            }*/
 
             return true;
         }

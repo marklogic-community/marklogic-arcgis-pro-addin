@@ -41,8 +41,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private void AddConstraint(object constraint)
         {
-            _searchModel.QueryString += constraint.ToString() + ":";
-            _searchModel.SuggestCommand.Execute(null);
+            //_searchModel.QueryString += constraint.ToString() + ":";
+            //_searchModel.SuggestCommand.Execute(null);
         }
     }
 }

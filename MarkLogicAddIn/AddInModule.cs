@@ -9,23 +9,15 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using MarkLogic.Esri.ArcGISPro.AddIn.Settings;
 using System.Windows;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
     internal class AddInModule : Module
     {
-        private static AddInModule _this = null;
+        public const string ModuleId = "MarkLogic_Esri_ArcGISPro_AddIn_Module";
 
-        /// <summary>
-        /// Retrieve the singleton instance to this module here
-        /// </summary>
-        public static AddInModule Current
-        {
-            get
-            {
-                return _this ?? (_this = (AddInModule)FrameworkApplication.FindModule("MarkLogic_Esri_ArcGISPro_AddIn_Module"));
-            }
-        }
+        public static AddInModule Current => (AddInModule)FrameworkApplication.FindModule(ModuleId);
 
         protected override bool Initialize()
         {
@@ -33,8 +25,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             return base.Initialize();
         }
 
-        private ObservableCollection<ConnectionProfile> _registeredConnectionProfiles = new ObservableCollection<ConnectionProfile>();
-        public ObservableCollection<ConnectionProfile> RegisteredConnectionProfiles => _registeredConnectionProfiles;
+        protected override bool CanUnload()
+        {
+            return true;
+        }
+
+        private MessageBus _messageBus;
+        public MessageBus MessageBus => _messageBus ?? (_messageBus = new MessageBus());
+
+        private ObservableCollection<ConnectionProfile> _registeredConnectionProfiles;
+        public ObservableCollection<ConnectionProfile> RegisteredConnectionProfiles => _registeredConnectionProfiles ?? (_registeredConnectionProfiles = new ObservableCollection<ConnectionProfile>());
 
         private void LoadConnectionProfiles()
         {
@@ -70,19 +70,5 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        #region Overrides
-        /// <summary>
-        /// Called by Framework when ArcGIS Pro is closing
-        /// </summary>
-        /// <returns>False to prevent Pro from closing, otherwise True</returns>
-        protected override bool CanUnload()
-        {
-            //TODO - add your business logic
-            //return false to ~cancel~ Application close
-            return true;
-        }
-
-        #endregion Overrides
     }
 }

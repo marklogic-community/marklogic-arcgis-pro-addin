@@ -97,7 +97,7 @@ namespace MarkLogic.Extensions.Koop
                 structuredQuery = payload.ToString();
             }
             ub.AddQueryParam("rs:query", structuredQuery);
-            ub.AddQueryParam("rs:qtext", query.FullQuery); // FullQuery includes inline facets
+            ub.AddQueryParam("rs:qtext", query.QueryText);
             ub.AddQueryParam("rs:searchOptions", createOptions.SearchOptions);
 
             if (isReplacing)

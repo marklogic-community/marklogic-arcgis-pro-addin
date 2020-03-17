@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -22,7 +23,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             if (EqualityComparer<T>.Default.Equals(storage, value))
                 return false;
             storage = value;
-            this.OnPropertyChanged(propertyName);
+            NotifyPropertyChanged(propertyName);
             return true;
         }
     }

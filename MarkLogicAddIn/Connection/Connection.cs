@@ -8,17 +8,16 @@ namespace MarkLogic
 {
     public class Connection
     {
-        private ConnectionProfile _profile;
         private HttpClient _http;
         
         internal Connection(ConnectionProfile profile, HttpClient http)
         {
             if (profile == null) throw new ArgumentNullException("profile");
-            _profile = (ConnectionProfile)profile.Clone();
+            Profile = (ConnectionProfile)profile.Clone();
             _http = http ?? throw new ArgumentNullException("http");
         }
 
-        public ConnectionProfile Profile => _profile;
+        public ConnectionProfile Profile { get; private set; }
         
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
@@ -28,7 +27,7 @@ namespace MarkLogic
                 var wwwAuth = response.Headers.WwwAuthenticate.FirstOrDefault();
                 var scheme = wwwAuth != null ? wwwAuth.Scheme : "Basic";
                 var domain = scheme.ToLower() == "digest" ? wwwAuth.GetWwwAuthParameterValue("realm") : null;
-                throw new AuthorizationRequiredException(new AuthorizationRequiredInfo(request.RequestUri.ToString(), scheme, domain));
+                throw new AuthorizationRequiredException(Profile, request.RequestUri.ToString(), scheme, domain);
             }
             response.EnsureSuccessStatusCode();
             return response;
@@ -37,23 +36,16 @@ namespace MarkLogic
 
     public class AuthorizationRequiredException : Exception
     {
-        public AuthorizationRequiredException(AuthorizationRequiredInfo info)
-            : base($"Authorization required for '{info.RequestUri}'.")
+        public AuthorizationRequiredException(ConnectionProfile connProfile, string requestUri, string scheme, string domain)
+            : base($"Authorization required for '{requestUri}'.")
         {
-            AuthInfo = info;
-        }
-
-        public AuthorizationRequiredInfo AuthInfo { get; private set; }
-    }
-
-    public class AuthorizationRequiredInfo
-    {
-        public AuthorizationRequiredInfo(string requestUri, string scheme, string domain)
-        {
+            ConnectionProfile = connProfile;
             RequestUri = requestUri;
             Scheme = scheme;
             Domain = domain;
         }
+
+        public ConnectionProfile ConnectionProfile { get; private set; }
 
         public string RequestUri { get; private set; }
 

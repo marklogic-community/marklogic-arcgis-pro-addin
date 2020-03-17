@@ -64,7 +64,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         {
             if (base.SetProperty(ref storage, value, propertyName))
             {
-                OnPropertyChanged("IsFormValid");
+                NotifyPropertyChanged("IsFormValid");
                 return true;
             }
             else
