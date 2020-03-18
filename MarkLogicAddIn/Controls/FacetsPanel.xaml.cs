@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace MarkLogic.Esri.ArcGISPro.AddIn
+namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 {
     public partial class FacetsPanel : UserControl
     {

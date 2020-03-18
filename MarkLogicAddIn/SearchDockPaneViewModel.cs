@@ -1,8 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using ArcGIS.Desktop.Framework;
+﻿using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
@@ -65,25 +61,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             else
                 State = SearchModelState.HasConnection;
             NotifyPropertyChanged(nameof(State));
-        }
-    }
-
-    public class EnumToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object property, CultureInfo culture)
-        {
-            if (value != null && value.GetType().IsEnum)
-                return Enum.Equals(value, property) ? Visibility.Visible : Visibility.Collapsed;
-            else
-                return DependencyProperty.UnsetValue;
-        }
-
-        public object ConvertBack(object value, Type targetType, object property, CultureInfo culture)
-        {
-            if (value is Visibility && (Visibility)value == Visibility.Visible)
-                return property;
-            else
-                return DependencyProperty.UnsetValue;
         }
     }
 

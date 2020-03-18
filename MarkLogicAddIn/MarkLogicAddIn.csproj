@@ -103,6 +103,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
+    <Compile Include="Controls\SearchOptionsPanel.xaml.cs">
+      <DependentUpon>SearchOptionsPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\EnumToVisibilityConverter.cs" />
     <Compile Include="SearchCommand.cs" />
     <Compile Include="Connection\Client\Document\Document.cs" />
     <Compile Include="Connection\Client\Document\DocumentService.cs" />
@@ -151,7 +155,7 @@
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Connection\ExtensionMethods.cs" />
-    <Compile Include="FacetsPanel.xaml.cs">
+    <Compile Include="Controls\FacetsPanel.xaml.cs">
       <DependentUpon>FacetsPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Feature\FeatureLayerBuilder.cs" />
@@ -208,6 +212,10 @@
     <AddInContent Include="DarkImages\GenericButtonPurple32.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\SearchOptionsPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
     <Page Include="DocumentPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -224,7 +232,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="FacetsPanel.xaml">
+    <Page Include="Controls\FacetsPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
