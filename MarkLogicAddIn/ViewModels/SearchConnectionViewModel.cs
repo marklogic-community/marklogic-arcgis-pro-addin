@@ -4,6 +4,7 @@ using MarkLogic.Extensions.Koop;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
@@ -31,7 +32,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 if (SetProperty(ref _selectedConnProfile, value))
                 {
                     NotifyPropertyChanged(nameof(HasSelectedProfile));
-                    MessageBus.Publish(new ConnectionProfileChangedMessage(value));
+                    MessageBus.Publish(new ConnectionProfileChangedMessage(value)).Wait();
                 }
             }
         }
@@ -62,7 +63,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 if (SetProperty(ref _selectedServiceModel, value))
                 {
                     NotifyPropertyChanged(nameof(HasSelectedServiceModel));
-                    MessageBus.Publish(new ServiceModelChangedMessage(value));
+                    MessageBus.Publish(new ServiceModelChangedMessage(value)).Wait();
                 }
             }
         }

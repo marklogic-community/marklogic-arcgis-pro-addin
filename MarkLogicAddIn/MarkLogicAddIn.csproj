@@ -176,6 +176,8 @@
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
     <Compile Include="ResultsPanelViewModel.cs" />
     <Compile Include="ServerCommand.cs" />
+    <Compile Include="ViewModels\FacetValueViewModel.cs" />
+    <Compile Include="ViewModels\FacetViewModel.cs" />
     <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
     <Compile Include="ViewModels\Messages\ConnectionProfileChangedMessage.cs" />
     <Compile Include="ViewModels\Messages\EndSearchMessage.cs" />

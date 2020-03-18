@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarkLogic.Client.Search
 {
@@ -13,10 +10,6 @@ namespace MarkLogic.Client.Search
             Name = !string.IsNullOrWhiteSpace(name) ? name : throw new ArgumentNullException("name");
             Type = type;
             Values = new List<FacetValue>(values);
-        }
-
-        public Facet(Facet facet) : this(facet.Name, facet.Type, facet.Values)
-        {
         }
 
         public string Name { get; private set; }

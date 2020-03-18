@@ -12,7 +12,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
     public class SearchCommand : ServerCommand
     {
-        public SearchCommand(MessageBus messageBus, Action<Exception> error = null)
+        public SearchCommand(MessageBus messageBus, Action<object> preSearch = null, Action<Exception> error = null)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<ConnectionProfileChangedMessage>(m => 
@@ -28,6 +28,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
             ExecuteCallback = new Func<object, Task>(ExecuteSearch);
             CanExecuteCallback = o => ConnectionProfile != null && ServiceModel != null;
+            PreSearchCallback = preSearch;
             ErrorCallback = error;
         }
 
@@ -39,16 +40,20 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private IServiceModel ServiceModel { get; set; }
 
+        private Action<object> PreSearchCallback { get; set; }
+
         private async Task ExecuteSearch(object parameter)
         {
+            PreSearchCallback?.Invoke(parameter);
+
             // build query
             var query = new SearchQuery();
-            MessageBus.Publish(new BeginSearchMessage(query));
+            await MessageBus.Publish(new BeginSearchMessage(query));
 
             // get results
             var conn = ConnectionService.Instance.Create(ConnectionProfile);
             var results = await SearchService.Instance.Search(conn, query, ServiceModel);
-            MessageBus.Publish(new EndSearchMessage(results));
+            await MessageBus.Publish(new EndSearchMessage(results));
         }
     }
 }

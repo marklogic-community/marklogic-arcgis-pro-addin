@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarkLogic.Client.Search
 {
@@ -58,8 +56,6 @@ namespace MarkLogic.Client.Search
         public long Start { get { return _response.Value<long>("start"); } }
 
         public IDictionary<string, Facet> Facets { get { return _facets ?? (_facets = ReadFacets(_response)); } }
-
-        public IEnumerable<FacetValue> SelectedFacetValues => Facets.Values.SelectMany(f => f.Values).Where(v => v.Selected);
 
         public IEnumerable<SearchResult> Results => _results ?? (_results = ReadResults(_response));
 

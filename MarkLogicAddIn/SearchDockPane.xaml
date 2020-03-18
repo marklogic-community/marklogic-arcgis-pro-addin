@@ -84,7 +84,7 @@
                                     </Image.Style>
                                 </Image>
                             </Button>
-                            <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" Text="{Binding QueryViewModel.QueryString, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
+                            <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" Text="{Binding QueryViewModel.QueryText, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Search">
                                         <i:InvokeCommandAction Command="{Binding QueryViewModel.Search}"/>
@@ -100,11 +100,11 @@
                                 </controls:SearchTextBox.SuggestionItemTemplate>
                             </controls:SearchTextBox>
                         </DockPanel>
-                        <TextBlock Margin="5,2,5,0" Text="{Binding Path=QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
+                        <TextBlock Margin="5,2,5,0" Text="{Binding QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
                     </StackPanel>
                 </Expander>
                 <Expander Header="Facets" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
-                    <AddIn:FacetsPanel Margin="5,0,5,0" Facets="{Binding Facets}" SelectFacet="{Binding SelectFacetCommand}" />
+                    <AddIn:FacetsPanel DataContext="{Binding Path=FacetsViewModel}" Margin="5,0,5,0" Facets="{Binding Facets}" SelectFacet="{Binding SelectFacet}" />
                 </Expander>
             </StackPanel>
         </ScrollViewer>

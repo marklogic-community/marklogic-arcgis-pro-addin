@@ -45,21 +45,29 @@ namespace MarkLogic.Client.Search
             inputParams.Add("request", new JArray("results", "facets", "values"));
             inputParams.Add("aggregateValues", true);
 
-            var searchViewport = new JObject();
-            var viewport = query.Viewport ?? GeospatialBox.FullExtent;
-            var viewportBox = new JObject();
-            viewportBox.Add("s", viewport.South);
-            viewportBox.Add("w", viewport.West);
-            viewportBox.Add("n", viewport.North);
-            viewportBox.Add("e", viewport.East);
-            searchViewport.Add("box", viewportBox);
-            searchViewport.Add("maxLatDivs", 50); // TODO: should be user configurable
-            searchViewport.Add("maxLonDivs", 25);
-
             var inputSearch = new JObject();
             inputSearch.Add("qtext", query.QueryText);
-            inputSearch.Add("viewport", searchViewport);
-
+            if (query.FacetNames.Count > 0)
+            {
+                var facets = new JObject();
+                foreach(var facetName in query.FacetNames)
+                    facets.Add(facetName, new JArray(query.GetFacetValues(facetName).Cast<object>().ToArray()));
+                inputSearch.Add("facets", facets);
+            }
+            if (query.Viewport != null)
+            {
+                var viewport = new JObject();
+                var box = new JObject();
+                box.Add("s", query.Viewport.South);
+                box.Add("w", query.Viewport.West);
+                box.Add("n", query.Viewport.North);
+                box.Add("e", query.Viewport.East);
+                viewport.Add("box", box);
+                viewport.Add("maxLatDivs", 50); // TODO: should be user configurable
+                viewport.Add("maxLonDivs", 25);
+                inputSearch.Add("viewport", viewport);
+            }
+            
             var input = new JObject();
             input.Add("params", inputParams);
             input.Add("search", inputSearch);

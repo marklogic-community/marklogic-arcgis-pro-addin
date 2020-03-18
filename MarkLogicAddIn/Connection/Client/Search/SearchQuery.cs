@@ -18,17 +18,17 @@ namespace MarkLogic.Client.Search
 
         public string QueryText { get; set; }
 
-        public void AddFacetValue(string facetName, string facetValue)
+        public void AddFacetValue(string facetName, string valueName)
         {
             if (!_facets.TryGetValue(facetName, out HashSet<string> facetValues))
             {
                 facetValues = new HashSet<string>();
                 _facets.Add(facetName, facetValues);
             }
-            facetValues.Add(facetValue);
+            facetValues.Add(valueName);
         }
 
-        public IEnumerable<string> FacetNames => _facets.Keys;
+        public ICollection<string> FacetNames => _facets.Keys;
 
         public IEnumerable<string> GetFacetValues(string facetName)
         {

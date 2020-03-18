@@ -3,10 +3,12 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
+using MarkLogic.Client.Search.Query;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
@@ -18,11 +20,35 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
         public MapOverlayManager(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<BeginSearchMessage>(m => Clear());
+            MessageBus.Subscribe<BeginSearchMessage>(async m => 
+            {
+                Clear();
+                m.Query.Viewport = await GetCurrentViewport();
+            });
             MessageBus.Subscribe<EndSearchMessage>(m => ApplyResults(m.Results));
         }
 
         private MessageBus MessageBus { get; set; }
+
+        private Task<GeospatialBox> GetCurrentViewport()
+        {
+            Debug.Assert(MapView.Active != null);
+            return QueuedTask.Run(() =>
+            {
+                var extent = MapView.Active.Extent;
+                var extentEnvelope = EnvelopeBuilder.CreateEnvelope(extent.XMin, extent.YMin, extent.XMax, extent.YMax, extent.SpatialReference);
+                ProjectionTransformation pxForm = ProjectionTransformation.Create(extent.SpatialReference, SpatialReferences.WGS84);
+                var wgsEnvelope = GeometryEngine.Instance.ProjectEx(extentEnvelope, pxForm) as Envelope;
+
+                return new GeospatialBox()
+                {
+                    North = Math.Min(wgsEnvelope.YMax, 90.0), // north up to +90 deg
+                    South = Math.Max(wgsEnvelope.YMin, -90.0), // south up to -90 deg
+                    West = Math.Max(wgsEnvelope.XMin, -180.0), // west up to -180 deg
+                    East = Math.Min(wgsEnvelope.XMax, 180.0) // east up to +180 deg
+                };
+            });
+        }
 
         public void Clear()
         {
