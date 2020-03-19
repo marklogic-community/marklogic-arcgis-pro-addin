@@ -32,15 +32,18 @@
                 <TextBlock Margin="15,1,15,0" Style="{DynamicResource Esri_TextBlockRegular}" Text="No registered MarkLogic servers found.  Go to your MarLogic Application Settings in Project Options to add a MarkLogic server." TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
-        <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoConnection}}">
+        <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoConnection}}"
+              IsEnabled="{Binding ConnectionViewModel.NotConnecting}">
             <StackPanel DataContext="{Binding Path=ConnectionViewModel}" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
                 <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="Connect to a MarkLogic server"/>
                 <ComboBox Margin="5" ItemsSource="{Binding ConnectionProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedConnectionProfile}"></ComboBox>
                 <Button Margin="5" Width="80" Style="{DynamicResource Esri_Button}" Command="{Binding GetServiceModels}">Connect</Button>
             </StackPanel>
         </Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                      Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.HasConnection}}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.HasConnection}}"
+                      IsEnabled="{Binding QueryViewModel.NotSearching}">
             <StackPanel>
                 <Expander Header="Search" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
                     <StackPanel>
@@ -102,14 +105,23 @@
                                 </controls:SearchTextBox.SuggestionItemTemplate>
                             </controls:SearchTextBox>
                         </DockPanel>
-                        <TextBlock Margin="5,2,5,0" Text="{Binding QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
+                        <TextBlock Margin="5,2,5,0" TextWrapping="Wrap" Text="{Binding QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
                     </StackPanel>
                 </Expander>
                 <Expander Header="Search Options" Margin="0" IsExpanded="False" Style="{DynamicResource Esri_ExpanderBorderless}">
-                    <Controls:SearchOptionsPanel DataContext="{Binding Path=OptionsViewModel}" Margin="5,0,5,0"/>
+                    <Controls:SearchOptionsPanel DataContext="{Binding Path=OptionsViewModel}" 
+                                                 Margin="5,0,5,0"
+                                                 LimitValues="{Binding LimitValues}"
+                                                 MaxValues="{Binding MaxValues, Mode=TwoWay}"
+                                                 ClusterResults="{Binding ClusterResults}"
+                                                 ClusterDivisions="{Binding ClusterDivisions}"
+                                                 ApplyOptions="{Binding ApplyOptions}"/>
                 </Expander>
                 <Expander Header="Facets" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
-                    <Controls:FacetsPanel DataContext="{Binding Path=FacetsViewModel}" Margin="5,0,5,0" Facets="{Binding Facets}" SelectFacet="{Binding SelectFacet}" />
+                    <Controls:FacetsPanel DataContext="{Binding Path=FacetsViewModel}" 
+                                          Margin="5,0,5,0" 
+                                          Facets="{Binding Facets}" 
+                                          SelectFacet="{Binding SelectFacet}" />
                 </Expander>
             </StackPanel>
         </ScrollViewer>

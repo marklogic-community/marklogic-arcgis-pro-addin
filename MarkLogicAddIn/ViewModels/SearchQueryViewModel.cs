@@ -17,12 +17,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
                 IsSearching = true;
-                StatusMessage = "Running query...";
+                StatusMessage = "Searching...";
                 m.Query.QueryText = QueryText;
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                StatusMessage = $"Returned {m.Results.Total} results.";
+                StatusMessage = $"Matched {m.Results.Total,1:n0} documents and {m.Results.TotalObjects,1:n0} distinct objects.";
                 IsSearching = false;
             });
         }
@@ -37,8 +37,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public bool IsSearching
         {
             get { return _isSearching; }
-            set { SetProperty(ref _isSearching, value); }
+            set 
+            { 
+                SetProperty(ref _isSearching, value);
+                NotifyPropertyChanged(nameof(NotSearching));
+            }
         }
+
+        public bool NotSearching => !IsSearching;
 
         private string _statusMsg;
         public string StatusMessage
@@ -55,6 +61,10 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         }
 
         private SearchCommand _cmdSearch;
-        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus, e => IsSearching = false));
+        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus, null, e =>
+        {
+            IsSearching = false;
+            StatusMessage = "Search aborted.";
+        }));
     }
 }

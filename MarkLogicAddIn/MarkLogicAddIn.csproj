@@ -197,6 +197,7 @@
     <Compile Include="Settings\SettingsViewModel.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="ViewModels\SearchFacetsViewModel.cs" />
+    <Compile Include="ViewModels\SearchOptionsViewModel.cs" />
     <Compile Include="ViewModels\SearchQueryViewModel.cs" />
   </ItemGroup>
   <ItemGroup>

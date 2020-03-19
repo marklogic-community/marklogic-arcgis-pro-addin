@@ -43,7 +43,8 @@ namespace MarkLogic.Client.Search
             var inputParams = new JObject();
             inputParams.Add("id", serviceModel.Id);
             inputParams.Add("request", new JArray("results", "facets", "values"));
-            inputParams.Add("aggregateValues", true);
+            inputParams.Add("aggregateValues", query.AggregateValues);
+            if (query.ValuesLimit > 0) inputParams.Add("valuesLimit", query.ValuesLimit);
 
             var inputSearch = new JObject();
             inputSearch.Add("qtext", query.QueryText);
@@ -63,8 +64,8 @@ namespace MarkLogic.Client.Search
                 box.Add("n", query.Viewport.North);
                 box.Add("e", query.Viewport.East);
                 viewport.Add("box", box);
-                viewport.Add("maxLatDivs", 50); // TODO: should be user configurable
-                viewport.Add("maxLonDivs", 25);
+                viewport.Add("maxLonDivs", query.MaxLonDivs);
+                viewport.Add("maxLatDivs", query.MaxLatDivs);
                 inputSearch.Add("viewport", viewport);
             }
             

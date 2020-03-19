@@ -2,13 +2,14 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 {
     public partial class SearchOptionsPanel : UserControl
     {
-        public const long DefaultValuesLimit = 1000;
+        private bool _clusterDivisionsDragStarted = false;
 
         public SearchOptionsPanel()
         {
@@ -52,17 +53,13 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 
         private void InvokeApplyOptions()
         {
-            if (LimitValues && MaxValues <= 0)
-                return;
             ApplyOptions?.Execute(null);
         }
 
-        private void ValuesLimit_CheckChanged(object sender, RoutedEventArgs e)
+        private void ValuesLimit_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            LimitValues = (sender as CheckBox).IsChecked.GetValueOrDefault(false);
-            MaxValues = LimitValues ? DefaultValuesLimit : 0;
-            ctlMaxValues.Text = LimitValues ? DefaultValuesLimit.ToString() : "";
-            InvokeApplyOptions();
+            if (!string.IsNullOrWhiteSpace(ctlMaxValues.Text) || !ctlValuesLimit.IsChecked.GetValueOrDefault(false))
+                InvokeApplyOptions();
         }
 
         private void MaxValues_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -72,13 +69,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 
         private void MaxValues_KeyDown(object sender, KeyEventArgs e)
         {
-            var text = (sender as TextBox).Text;
+            var text = ctlMaxValues.Text;
             if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(text))
             {
                 try 
                 {
                     MaxValues = Convert.ToInt64(text);
-                    e.Handled = true;
                     InvokeApplyOptions();
                 }
                 catch (Exception)
@@ -90,14 +86,30 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 
         private void ClusterResults_CheckChanged(object sender, RoutedEventArgs e)
         {
-            ClusterResults = (sender as CheckBox).IsChecked.GetValueOrDefault(false);
+            InvokeApplyOptions();
+        }
+
+        private void UpdateClusterDivisions()
+        {
+            ClusterDivisions = Convert.ToUInt32(ctlClusterDivisions.Value);
             InvokeApplyOptions();
         }
 
         private void ClusterDivisions_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ClusterDivisions = Convert.ToUInt32((sender as Slider).Value);
-            InvokeApplyOptions();
+            if (!_clusterDivisionsDragStarted)
+                UpdateClusterDivisions();
+        }
+
+        private void ClusterDivisions_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            _clusterDivisionsDragStarted = true;
+        }
+
+        private void ClusterDivisions_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            UpdateClusterDivisions();
+            _clusterDivisionsDragStarted = false;
         }
     }
 }

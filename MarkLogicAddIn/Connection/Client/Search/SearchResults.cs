@@ -89,6 +89,8 @@ namespace MarkLogic.Client.Search
             get { return Math.Max(Total / PageLength, 1); }
         }
 
+        public long TotalObjects => _response.SelectTokens("$.values.*.total").Values<long>().Sum();
+
         public IEnumerable<string> ValueNames => _response.Value<JObject>("values").Properties().Select(p => p.Name);
 
         public IEnumerable<ValuePoint> GetValuePoints(string valueName)

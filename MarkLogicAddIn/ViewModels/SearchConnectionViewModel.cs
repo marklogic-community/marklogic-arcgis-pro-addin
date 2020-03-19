@@ -46,13 +46,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             async o =>
             {
                 Debug.Assert(SelectedConnectionProfile != null);
+                Connecting = true;
                 var conn = ConnectionService.Instance.Create(SelectedConnectionProfile);
                 ServiceModels.Clear();
                 foreach (var model in await KoopService.GetServiceModels(conn))
                     ServiceModels.Add(model);
+                Connecting = false;
                 Connected = true;
             },
-            o => HasSelectedProfile));
+            o => HasSelectedProfile,
+            e => Connecting = false));
 
         private IServiceModel _selectedServiceModel;
         public IServiceModel SelectedServiceModel
@@ -69,6 +72,19 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         }
 
         public bool HasSelectedServiceModel => SelectedServiceModel != null;
+
+        private bool _connecting;
+        public bool Connecting
+        {
+            get { return _connecting; }
+            set 
+            { 
+                SetProperty(ref _connecting, value);
+                NotifyPropertyChanged(nameof(NotConnecting));
+            }
+        }
+
+        public bool NotConnecting => !Connecting;
 
         private bool _connected;
         public bool Connected
