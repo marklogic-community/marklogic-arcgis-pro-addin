@@ -103,6 +103,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
+    <Compile Include="Controls\ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PointSymbologyPanel.xaml.cs">
+      <DependentUpon>PointSymbologyPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SearchOptionsPanel.xaml.cs">
       <DependentUpon>SearchOptionsPanel.xaml</DependentUpon>
     </Compile>
@@ -180,6 +186,9 @@
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
     <Compile Include="ResultsPanelViewModel.cs" />
     <Compile Include="ServerCommand.cs" />
+    <Compile Include="ViewModels\Messages\GetSymbologyMessage.cs" />
+    <Compile Include="ViewModels\Messages\RedrawMessage.cs" />
+    <Compile Include="ViewModels\SymbologyItemViewModel.cs" />
     <Compile Include="ViewModels\FacetValueViewModel.cs" />
     <Compile Include="ViewModels\FacetViewModel.cs" />
     <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
@@ -199,6 +208,7 @@
     <Compile Include="ViewModels\SearchFacetsViewModel.cs" />
     <Compile Include="ViewModels\SearchOptionsViewModel.cs" />
     <Compile Include="ViewModels\SearchQueryViewModel.cs" />
+    <Compile Include="ViewModels\SymbologyViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\GenericButtonPurple16.png" />
@@ -213,6 +223,14 @@
     <AddInContent Include="DarkImages\GenericButtonPurple32.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\PointSymbologyPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
     <Page Include="Controls\SearchOptionsPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>

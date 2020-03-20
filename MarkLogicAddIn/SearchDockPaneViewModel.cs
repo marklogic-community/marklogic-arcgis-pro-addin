@@ -32,6 +32,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             QueryViewModel = new SearchQueryViewModel(messageBus);
             FacetsViewModel = new SearchFacetsViewModel(messageBus);
             OptionsViewModel = new SearchOptionsViewModel(messageBus);
+            SymbologyViewModel = new SymbologyViewModel(messageBus);
             MapOverlay = new MapOverlayManager(messageBus);
             ActiveMapViewChangedEvent.Subscribe(e => ResolveSearchModelState());
             MapViewCameraChangedEvent.Subscribe(e =>
@@ -48,6 +49,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public SearchFacetsViewModel FacetsViewModel { get; private set; }
 
         public SearchOptionsViewModel OptionsViewModel { get; private set; }
+
+        public SymbologyViewModel SymbologyViewModel { get; private set; }
 
         public MapOverlayManager MapOverlay { get; private set; }
 

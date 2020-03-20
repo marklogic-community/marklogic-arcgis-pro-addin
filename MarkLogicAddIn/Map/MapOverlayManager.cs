@@ -15,8 +15,13 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 {
     public class MapOverlayManager
     {
-        private List<IDisposable> _overlayElements = new List<IDisposable>();
+        public const double DefaultPointSize = 5.0;
+        public static readonly CIMColor DefaultPointColor = ColorFactory.Instance.CreateRGBColor(255, 0, 0, 60);
+        public const SimpleMarkerStyle DefaultPointMarkerStyle = SimpleMarkerStyle.Circle;
 
+        private Dictionary<string, List<IDisposable>> _overlayElementMap = new Dictionary<string, List<IDisposable>>();
+        private SearchResults _prevSearchResults;
+        
         public MapOverlayManager(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
@@ -25,7 +30,17 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 Clear();
                 m.Query.Viewport = await GetCurrentViewport();
             });
-            MessageBus.Subscribe<EndSearchMessage>(m => ApplyResults(m.Results));
+            MessageBus.Subscribe<EndSearchMessage>(async m => {
+                
+                await ApplyResults(m.Results);
+                _prevSearchResults = m.Results;
+            });
+            MessageBus.Subscribe<RedrawMessage>(async m =>
+            {
+                if (_prevSearchResults == null)
+                    return;
+                await ApplyResults(_prevSearchResults);
+            });
         }
 
         private MessageBus MessageBus { get; set; }
@@ -52,17 +67,10 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 
         public void Clear()
         {
-            foreach (var overlayElem in _overlayElements)
-                overlayElem.Dispose();
-            _overlayElements.Clear();
+            foreach(var overlayElems in _overlayElementMap.Values)
+                overlayElems.ForEach(elem => elem.Dispose());
+            _overlayElementMap.Clear();
         }
-
-        // TODO: these should be exposed as user configurable options
-        public double DefaultPointSize => 5.0;
-
-        public CIMColor DefaultPointColor => ColorFactory.Instance.CreateRGBColor(255, 0, 0, 60);
-        
-        public SimpleMarkerStyle DefaultPointMarkerStyle => SimpleMarkerStyle.Circle;
 
         public async Task<bool> ApplyResults(SearchResults results)
         {
@@ -70,35 +78,45 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             if (mapView == null) return false;
 
             Clear();
+            var symbologies = new Dictionary<string, GetSymbologyMessage>();
+            foreach(var valueName in results.ValueNames)
+            {
+                var msg = new GetSymbologyMessage(valueName);
+                await MessageBus.Publish(msg);
+                Debug.Assert(msg.Resolved);
+                symbologies.Add(valueName, msg);
+            }
 
             await QueuedTask.Run(() =>
             {
-                var pointSize = DefaultPointSize;
-                var pointColor = DefaultPointColor;
-                var pointMarkerStyle = DefaultPointMarkerStyle;
-
-                var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
-                (((pointSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
-                var pointSymbolRef = pointSymbol.MakeSymbolReference();
-
-                var pointClusterSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
-                (((pointClusterSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
-
-                var pointClusterTextSymbol = SymbolFactory.Instance.ConstructTextSymbol(ColorFactory.Instance.WhiteRGB, pointSize * 1.5, "Arial", "Bold");
-                pointClusterTextSymbol.HorizontalAlignment = HorizontalAlignment.Center;
-                pointClusterTextSymbol.VerticalAlignment = VerticalAlignment.Center;
-                var pointClusterTextSymbolRef = pointClusterTextSymbol.MakeSymbolReference();
-
                 var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
-
                 foreach (var valueName in results.ValueNames)
                 {
+                    var overlayElems = new List<IDisposable>();
+                    _overlayElementMap.Add(valueName, overlayElems);
+
+                    var symbology = symbologies[valueName];
+                    var pointSize = symbology.Size;
+                    var pointColor = ColorFactory.Instance.CreateRGBColor(symbology.Color.R, symbology.Color.G, symbology.Color.B, symbology.Opacity);
+                    var pointMarkerStyle = symbology.Shape;
+
+                    var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
+                    (((pointSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
+                    var pointSymbolRef = pointSymbol.MakeSymbolReference();
+
+                    var pointClusterSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
+                    (((pointClusterSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
+
+                    var pointClusterTextSymbol = SymbolFactory.Instance.ConstructTextSymbol(ColorFactory.Instance.WhiteRGB, pointSize * 1.5, "Arial", "Bold");
+                    pointClusterTextSymbol.HorizontalAlignment = HorizontalAlignment.Center;
+                    pointClusterTextSymbol.VerticalAlignment = VerticalAlignment.Center;
+                    var pointClusterTextSymbolRef = pointClusterTextSymbol.MakeSymbolReference();
+
                     foreach (var point in results.GetValuePoints(valueName))
                     {
                         var mapPoint = MapPointBuilder.CreateMapPoint(point.Longitude, point.Latitude, spatialRef);
-                        _overlayElements.Add(mapView.AddOverlay(mapPoint, pointSymbolRef));
+                        overlayElems.Add(mapView.AddOverlay(mapPoint, pointSymbolRef));
                     }
-                    
                     foreach (var pointCluster in results.GetValuePointClusters(valueName))
                     {
                         var text = pointCluster.Count.ToString();
@@ -109,12 +127,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                         var multiplier = 1 + ((text.Length - 1) * 0.5); // increase size by 0.5 for every text digit
                         pointClusterSymbol.SetSize(baseSize * multiplier);
 
-                        _overlayElements.Add(mapView.AddOverlay(mapPoint, pointClusterSymbol.MakeSymbolReference()));
-                        _overlayElements.Add(mapView.AddOverlay(textGraphic));
-
-                        //_overlayElements.Add(MapView.AddOverlay(
-                        //    EnvelopeBuilder.CreateEnvelope(pointCluster.West * 2.0, pointCluster.South * 2.0, pointCluster.East * 2.0, pointCluster.North * 2.0, spatialRef), 
-                        //    extentSymbolRef));
+                        overlayElems.Add(mapView.AddOverlay(mapPoint, pointClusterSymbol.MakeSymbolReference()));
+                        overlayElems.Add(mapView.AddOverlay(textGraphic));
                     }
                 }
             });

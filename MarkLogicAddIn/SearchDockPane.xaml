@@ -117,6 +117,19 @@
                                                  ClusterDivisions="{Binding ClusterDivisions}"
                                                  ApplyOptions="{Binding ApplyOptions}"/>
                 </Expander>
+                <Expander Header="Symbology" Margin="0" IsExpanded="False" Style="{DynamicResource Esri_ExpanderBorderless}">
+                    <ItemsControl ItemsSource="{Binding SymbologyViewModel.Items}"
+                                  Margin="5,0,5,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Style="{DynamicResource Esri_TextBlockH3}" Text="{Binding ValueName}" HorizontalAlignment="Left"/>
+                                    <Controls:PointSymbologyPanel/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander>
                 <Expander Header="Facets" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
                     <Controls:FacetsPanel DataContext="{Binding Path=FacetsViewModel}" 
                                           Margin="5,0,5,0" 

@@ -29,7 +29,8 @@ namespace MarkLogic.Extensions.Koop
                         return json.Value<JObject>("models").PropertyValues().Select(m => new ServiceModel(
                             m.Value<string>("id"),
                             m.Value<string>("name"),
-                            m.Value<string>("description")));
+                            m.Value<string>("description"),
+                            m.Value<JArray>("valueNames").Values<string>().ToArray()));
                     }
                     catch(Exception e)
                     {
