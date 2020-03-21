@@ -1,9 +1,5 @@
-﻿using ArcGIS.Core.CIM;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
+﻿using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
-using MarkLogic.Client.Search.Query;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
@@ -11,6 +7,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
+#if DEBUG
+using System.Windows.Controls;
+using System.Windows.Media;
+#endif
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 {
@@ -30,45 +31,51 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
         }
 
         private Dictionary<string, OverlayGroup> _overlayGroupMap = new Dictionary<string, OverlayGroup>();
-        
+#if DEBUG
+        private MapViewOverlayControl _mapCtlPerf;
+        private TextBlock _ctlPerf;
+        private TimeSpan _perfClear;
+#endif
+
         public MapOverlayManager(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<BeginSearchMessage>(async m => 
+            MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
+#if DEBUG
+                var watch = Stopwatch.StartNew();
+#endif
                 Clear();
-                m.Query.Viewport = await GetCurrentViewport();
+#if DEBUG
+                watch.Stop();
+                _perfClear = watch.Elapsed;
+#endif
             });
-            MessageBus.Subscribe<EndSearchMessage>(async m => {
+            MessageBus.Subscribe<EndSearchMessage>(async m =>
+            {
+#if DEBUG
+                var watch = Stopwatch.StartNew();
+#endif
                 await ApplyResults(m.Results);
+#if DEBUG
+                watch.Stop();
+                UpdatePerfOverlay(_perfClear, watch.Elapsed, false);
+#endif
             });
             MessageBus.Subscribe<RedrawMessage>(async m =>
             {
+#if DEBUG
+                var watch = Stopwatch.StartNew();
+#endif
                 await Redraw(m.ValueName);
+#if DEBUG
+                watch.Stop();
+                UpdatePerfOverlay(_perfClear, watch.Elapsed, true);
+#endif
             });
         }
 
         private MessageBus MessageBus { get; set; }
-
-        private Task<GeospatialBox> GetCurrentViewport()
-        {
-            Debug.Assert(MapView.Active != null);
-            return QueuedTask.Run(() =>
-            {
-                var extent = MapView.Active.Extent;
-                var extentEnvelope = EnvelopeBuilder.CreateEnvelope(extent.XMin, extent.YMin, extent.XMax, extent.YMax, extent.SpatialReference);
-                ProjectionTransformation pxForm = ProjectionTransformation.Create(extent.SpatialReference, SpatialReferences.WGS84);
-                var wgsEnvelope = GeometryEngine.Instance.ProjectEx(extentEnvelope, pxForm) as Envelope;
-
-                return new GeospatialBox()
-                {
-                    North = Math.Min(wgsEnvelope.YMax, 90.0), // north up to +90 deg
-                    South = Math.Max(wgsEnvelope.YMin, -90.0), // south up to -90 deg
-                    West = Math.Max(wgsEnvelope.XMin, -180.0), // west up to -180 deg
-                    East = Math.Min(wgsEnvelope.XMax, 180.0) // east up to +180 deg
-                };
-            });
-        }
 
         public void Clear()
         {
@@ -122,6 +129,24 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             var retVals = await Task.WhenAll(pointsTask, pointClustersTask);
             return retVals.All(r => r == true);
         }
+
+#if DEBUG
+        private void UpdatePerfOverlay(TimeSpan perfClear, TimeSpan perfApply, bool isRedraw)
+        {
+            if (MapView.Active == null)
+                return;
+            if (_mapCtlPerf == null && _ctlPerf == null)
+            {
+                _ctlPerf = new TextBlock();
+                _ctlPerf.Background = Brushes.Transparent;
+                _ctlPerf.TextWrapping = System.Windows.TextWrapping.Wrap;
+                _mapCtlPerf = new MapViewOverlayControl(_ctlPerf, true, true, true, OverlayControlRelativePosition.BottomLeft);
+                MapView.Active.AddOverlayControl(_mapCtlPerf);
+            }
+
+            _ctlPerf.Text = $"Overlays cleared: {perfClear.ToString("mm':'ss':'fff")}\n{(isRedraw ? "Overlay redrawn" : "New overlays added")}: {perfApply.ToString("mm':'ss':'fff")}";
+        }
+#endif
 
         /*public async Task<bool> SelectPoint(double _long, double _lat)
         {
