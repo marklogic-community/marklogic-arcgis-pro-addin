@@ -1,5 +1,6 @@
 ﻿using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Mapping;
+using MarkLogic.Esri.ArcGISPro.AddIn.Map;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
@@ -8,17 +9,14 @@ using System.Windows.Media;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 {
-    public class SymbologyItemViewModel : ViewModelBase
+    public class PointSymbologyOptionsViewModel : ViewModelBase, IPointSymbology
     {
-        public SymbologyItemViewModel(MessageBus messageBus, string valueName)
+        public PointSymbologyOptionsViewModel(MessageBus messageBus, string valueName)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<GetSymbologyMessage>(m =>
             {
-                m.Color = Color ?? Colors.Black;
-                m.Shape = Shape;
-                m.Size = Size;
-                m.Opacity = Convert.ToInt32(Opacity);
+                m.Symbology = this;
                 m.Resolved = true;
             });
             ValueName = valueName ?? throw new ArgumentNullException("valueName");
@@ -34,8 +32,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 
         public string ValueName { get; private set; }
 
-        private Color? _color;
-        public Color? Color
+        private Color _color;
+        public Color Color
         {
             get { return _color; }
             set { SetProperty(ref _color, value); }
@@ -48,15 +46,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             set { SetProperty(ref _shape, value); }
         }
 
-        private uint _size;
-        public uint Size
+        private double _size;
+        public double Size
         {
             get { return _size; }
             set { SetProperty(ref _size, value); }
         }
 
-        private uint _opacity;
-        public uint Opacity
+        private int _opacity;
+        public int Opacity
         {
             get { return _opacity; }
             set { SetProperty(ref _opacity, value); }
@@ -64,5 +62,13 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 
         private RelayCommand _cmdApply;
         public ICommand Apply => _cmdApply ?? (_cmdApply = new RelayCommand(async () => await MessageBus.Publish(new RedrawMessage(ValueName))));
+
+        public bool Equals(IPointSymbology other)
+        {
+            return Color == other.Color &&
+                Shape == other.Shape &&
+                Size == other.Size &&
+                Opacity == other.Opacity;
+        }
     }
 }

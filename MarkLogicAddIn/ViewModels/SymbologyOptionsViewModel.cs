@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 {
-    public class SymbologyViewModel : ViewModelBase
+    public class SymbologyOptionsViewModel : ViewModelBase
     {
-        public SymbologyViewModel(MessageBus messageBus)
+        public SymbologyOptionsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<ServiceModelChangedMessage>(m =>
@@ -16,14 +16,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 if (m.ServiceModel != null)
                 {
                     foreach (var valueName in m.ServiceModel.ValueNames)
-                        Items.Add(new SymbologyItemViewModel(MessageBus, valueName));
+                        Items.Add(new PointSymbologyOptionsViewModel(MessageBus, valueName));
                 }
             });
-            Items = new ObservableCollection<SymbologyItemViewModel>();
+            Items = new ObservableCollection<PointSymbologyOptionsViewModel>();
         }
 
         protected MessageBus MessageBus { get; private set; }
 
-        public ObservableCollection<SymbologyItemViewModel> Items { get; }
+        public ObservableCollection<PointSymbologyOptionsViewModel> Items { get; }
     }
 }

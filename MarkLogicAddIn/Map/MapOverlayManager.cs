@@ -9,18 +9,27 @@ using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 {
     public class MapOverlayManager
     {
-        public const double DefaultPointSize = 5.0;
-        public static readonly CIMColor DefaultPointColor = ColorFactory.Instance.CreateRGBColor(255, 0, 0, 60);
-        public const SimpleMarkerStyle DefaultPointMarkerStyle = SimpleMarkerStyle.Circle;
+        private class OverlayGroup
+        {
+            public OverlayGroup(string valueName)
+            {
+                Points = new PointCollection(valueName);
+                PointClusters = new PointClusterCollection(valueName);
+            }
 
-        private Dictionary<string, List<IDisposable>> _overlayElementMap = new Dictionary<string, List<IDisposable>>();
-        private SearchResults _prevSearchResults;
+            public PointCollection Points { get; set; }
+
+            public PointClusterCollection PointClusters { get; set; }
+        }
+
+        private Dictionary<string, OverlayGroup> _overlayGroupMap = new Dictionary<string, OverlayGroup>();
         
         public MapOverlayManager(MessageBus messageBus)
         {
@@ -31,15 +40,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 m.Query.Viewport = await GetCurrentViewport();
             });
             MessageBus.Subscribe<EndSearchMessage>(async m => {
-                
                 await ApplyResults(m.Results);
-                _prevSearchResults = m.Results;
             });
             MessageBus.Subscribe<RedrawMessage>(async m =>
             {
-                if (_prevSearchResults == null)
-                    return;
-                await ApplyResults(_prevSearchResults);
+                await Redraw(m.ValueName);
             });
         }
 
@@ -67,73 +72,55 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 
         public void Clear()
         {
-            foreach(var overlayElems in _overlayElementMap.Values)
-                overlayElems.ForEach(elem => elem.Dispose());
-            _overlayElementMap.Clear();
+            foreach(var group in _overlayGroupMap.Values)
+            {
+                group.Points.Clear();
+                group.PointClusters.Clear();
+            }
+            _overlayGroupMap.Clear();
         }
 
         public async Task<bool> ApplyResults(SearchResults results)
         {
             var mapView = MapView.Active;
-            if (mapView == null) return false;
+            if (mapView == null)
+                return false;
 
-            Clear();
-            var symbologies = new Dictionary<string, GetSymbologyMessage>();
+            var tasks = new List<Task<bool>>();
             foreach(var valueName in results.ValueNames)
             {
                 var msg = new GetSymbologyMessage(valueName);
                 await MessageBus.Publish(msg);
-                Debug.Assert(msg.Resolved);
-                symbologies.Add(valueName, msg);
+                Debug.Assert(msg.Resolved && msg.Symbology != null);
+
+                var group = new OverlayGroup(valueName);
+                tasks.Add(group.Points.ApplyResults(mapView, results, msg.Symbology));
+                tasks.Add(group.PointClusters.ApplyResults(mapView, results, msg.Symbology));
+                _overlayGroupMap.Add(valueName, group);
             }
+            var retVals = await Task.WhenAll(tasks);
+            return retVals.All(r => r == true);
+        }
 
-            await QueuedTask.Run(() =>
-            {
-                var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
-                foreach (var valueName in results.ValueNames)
-                {
-                    var overlayElems = new List<IDisposable>();
-                    _overlayElementMap.Add(valueName, overlayElems);
+        public async Task<bool> Redraw(string valueName)
+        {
+            var mapView = MapView.Active;
+            if (mapView == null) 
+                return false;
 
-                    var symbology = symbologies[valueName];
-                    var pointSize = symbology.Size;
-                    var pointColor = ColorFactory.Instance.CreateRGBColor(symbology.Color.R, symbology.Color.G, symbology.Color.B, symbology.Opacity);
-                    var pointMarkerStyle = symbology.Shape;
+            var msg = new GetSymbologyMessage(valueName);
+            await MessageBus.Publish(msg);
+            Debug.Assert(msg.Resolved && msg.Symbology != null);
+            
+            var hasGroup = _overlayGroupMap.TryGetValue(valueName, out OverlayGroup group);
+            Debug.Assert(hasGroup);
+            if (!hasGroup)
+                return false;
 
-                    var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
-                    (((pointSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
-                    var pointSymbolRef = pointSymbol.MakeSymbolReference();
-
-                    var pointClusterSymbol = SymbolFactory.Instance.ConstructPointSymbol(pointColor, pointSize, pointMarkerStyle);
-                    (((pointClusterSymbol.SymbolLayers[0] as CIMVectorMarker).MarkerGraphics[0].Symbol as CIMPolygonSymbol).SymbolLayers[0] as CIMSolidStroke).Width = 0;
-
-                    var pointClusterTextSymbol = SymbolFactory.Instance.ConstructTextSymbol(ColorFactory.Instance.WhiteRGB, pointSize * 1.5, "Arial", "Bold");
-                    pointClusterTextSymbol.HorizontalAlignment = HorizontalAlignment.Center;
-                    pointClusterTextSymbol.VerticalAlignment = VerticalAlignment.Center;
-                    var pointClusterTextSymbolRef = pointClusterTextSymbol.MakeSymbolReference();
-
-                    foreach (var point in results.GetValuePoints(valueName))
-                    {
-                        var mapPoint = MapPointBuilder.CreateMapPoint(point.Longitude, point.Latitude, spatialRef);
-                        overlayElems.Add(mapView.AddOverlay(mapPoint, pointSymbolRef));
-                    }
-                    foreach (var pointCluster in results.GetValuePointClusters(valueName))
-                    {
-                        var text = pointCluster.Count.ToString();
-                        var mapPoint = MapPointBuilder.CreateMapPoint(pointCluster.Longitude, pointCluster.Latitude, spatialRef);
-                        var textGraphic = new CIMTextGraphic() { Text = text, Symbol = pointClusterTextSymbolRef, Shape = mapPoint };
-
-                        var baseSize = pointSize * 2; // smallest size (slightly bigger than for single points)
-                        var multiplier = 1 + ((text.Length - 1) * 0.5); // increase size by 0.5 for every text digit
-                        pointClusterSymbol.SetSize(baseSize * multiplier);
-
-                        overlayElems.Add(mapView.AddOverlay(mapPoint, pointClusterSymbol.MakeSymbolReference()));
-                        overlayElems.Add(mapView.AddOverlay(textGraphic));
-                    }
-                }
-            });
-
-            return true;
+            var pointsTask = group.Points.Redraw(mapView, msg.Symbology);
+            var pointClustersTask = group.PointClusters.Redraw(mapView, msg.Symbology);
+            var retVals = await Task.WhenAll(pointsTask, pointClustersTask);
+            return retVals.All(r => r == true);
         }
 
         /*public async Task<bool> SelectPoint(double _long, double _lat)

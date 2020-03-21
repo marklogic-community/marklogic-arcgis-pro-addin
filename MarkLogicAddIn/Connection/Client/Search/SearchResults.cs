@@ -100,7 +100,7 @@ namespace MarkLogic.Client.Search
                 return new ValuePoint[0];
             return (points as JArray).Select(obj => new ValuePoint()
             {
-                Count = obj.Value<ulong>("count"),
+                Count = obj.Value<long>("count"),
                 Latitude = obj.Value<double>("lat"),
                 Longitude = obj.Value<double>("lon")
             });
@@ -113,7 +113,7 @@ namespace MarkLogic.Client.Search
                 return new ValuePointCluster[0];
             return (pointClusters as JArray).Select(obj => new ValuePointCluster()
             {
-                Count = obj.Value<ulong>("count"),
+                Count = obj.Value<long>("count"),
                 South = obj.Value<double>("s"),
                 West = obj.Value<double>("w"),
                 North = obj.Value<double>("n"),
@@ -124,7 +124,7 @@ namespace MarkLogic.Client.Search
 
     public class ValuePoint
     {
-        public ulong Count { get; set; }
+        public long Count { get; set; }
 
         public double Latitude { get; set; }
 
@@ -133,7 +133,7 @@ namespace MarkLogic.Client.Search
 
     public class ValuePointCluster
     {
-        public ulong Count { get; set; }
+        public long Count { get; set; }
 
         public double South { get; set; }
 
