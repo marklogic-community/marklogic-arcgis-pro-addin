@@ -10,7 +10,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchOptionsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<BeginSearchMessage>(m =>
+            MessageBus.Subscribe<BuildSearchMessage>(m =>
             {
                 m.Query.ValuesLimit = LimitValues ? MaxValues : 0;
                 m.Query.AggregateValues = ClusterResults;

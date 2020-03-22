@@ -3,6 +3,7 @@ using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using MarkLogic.Extensions.Koop;
 using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
@@ -14,16 +15,33 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<ConnectionProfileChangedMessage>(m => ConnectionProfile = m.Profile);
             MessageBus.Subscribe<ServiceModelChangedMessage>(m => ServiceModel = m.ServiceModel);
+            MessageBus.Subscribe<BuildSearchMessage>(m =>
+            {
+                m.Query.QueryText = QueryText;
+            });
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
-                IsSearching = true;
-                StatusMessage = "Searching...";
-                m.Query.QueryText = QueryText;
+                if (m.ReturnOptions.HasFlag(ReturnOptions.Results))
+                {
+                    IsSearching = true;
+                    StatusMessage = "Searching...";
+                }
+                if (m.ReturnOptions.HasFlag(ReturnOptions.Suggest))
+                    Suggestions.Clear();
+
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                StatusMessage = $"Matched {m.Results.Total,1:n0} documents and {m.Results.TotalObjects,1:n0} distinct objects.";
-                IsSearching = false;
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results))
+                {
+                    StatusMessage = $"Matched {m.Results.Total,1:n0} documents and {m.Results.TotalObjects,1:n0} distinct objects.";
+                    IsSearching = false;
+                }
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Suggest))
+                {
+                    foreach (var suggestion in m.Results.QuerySuggestions)
+                        Suggestions.Add(suggestion);
+                }
             });
         }
 
@@ -61,10 +79,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         }
 
         private SearchCommand _cmdSearch;
-        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus, null, e =>
+        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus, e =>
         {
             IsSearching = false;
             StatusMessage = "Search aborted.";
         }));
+
+        public ObservableCollection<string> Suggestions { get; } = new ObservableCollection<string>();
+
+        private SearchCommand _cmdSuggest;
+        public ICommand Suggest => _cmdSuggest ?? (_cmdSuggest = new SearchCommand(MessageBus, null, ReturnOptions.Suggest));
     }
 }

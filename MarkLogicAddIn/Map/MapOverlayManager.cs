@@ -42,25 +42,31 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
+                if (m.ReturnOptions.HasFlag(ReturnOptions.Values))
+                {
 #if DEBUG
-                var watch = Stopwatch.StartNew();
+                    var watch = Stopwatch.StartNew();
 #endif
-                Clear();
+                    Clear();
 #if DEBUG
-                watch.Stop();
-                _perfClear = watch.Elapsed;
+                    watch.Stop();
+                    _perfClear = watch.Elapsed;
 #endif
+                }
             });
             MessageBus.Subscribe<EndSearchMessage>(async m =>
             {
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Values))
+                {
 #if DEBUG
-                var watch = Stopwatch.StartNew();
+                    var watch = Stopwatch.StartNew();
 #endif
-                await ApplyResults(m.Results);
+                    await ApplyResults(m.Results);
 #if DEBUG
-                watch.Stop();
-                UpdatePerfOverlay(_perfClear, watch.Elapsed, false);
+                    watch.Stop();
+                    UpdatePerfOverlay(_perfClear, watch.Elapsed, false);
 #endif
+                }
             });
             MessageBus.Subscribe<RedrawMessage>(async m =>
             {

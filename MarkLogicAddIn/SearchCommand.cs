@@ -3,16 +3,13 @@ using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using MarkLogic.Extensions.Koop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
     public class SearchCommand : ServerCommand
     {
-        public SearchCommand(MessageBus messageBus, Action<object> preSearch = null, Action<Exception> error = null)
+        public SearchCommand(MessageBus messageBus, Action<Exception> error = null, ReturnOptions returnOptions = SearchQuery.DefaultReturnOptions)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<ConnectionProfileChangedMessage>(m => 
@@ -28,8 +25,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
             ExecuteCallback = new Func<object, Task>(ExecuteSearch);
             CanExecuteCallback = o => ConnectionProfile != null && ServiceModel != null;
-            PreSearchCallback = preSearch;
             ErrorCallback = error;
+            ReturnOptions = returnOptions;
         }
 
         public override event EventHandler CanExecuteChanged;
@@ -40,18 +37,17 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         private IServiceModel ServiceModel { get; set; }
 
-        private Action<object> PreSearchCallback { get; set; }
+        private ReturnOptions ReturnOptions { get; set; }
 
         private async Task ExecuteSearch(object parameter)
         {
-            PreSearchCallback?.Invoke(parameter);
-
             // build query
-            var query = new SearchQuery();
-            await MessageBus.Publish(new BeginSearchMessage(query));
+            var query = new SearchQuery() { ReturnOptions = ReturnOptions };
+            await MessageBus.Publish(new BuildSearchMessage(query));
 
             // get results
             var conn = ConnectionService.Instance.Create(ConnectionProfile);
+            await MessageBus.Publish(new BeginSearchMessage(ReturnOptions));
             var results = await SearchService.Instance.Search(conn, query, ServiceModel);
             await MessageBus.Publish(new EndSearchMessage(results));
         }

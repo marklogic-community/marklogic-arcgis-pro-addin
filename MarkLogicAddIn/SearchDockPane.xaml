@@ -89,13 +89,19 @@
                                     </Image.Style>
                                 </Image>
                             </Button>
-                            <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" Text="{Binding QueryViewModel.QueryText, UpdateSourceTrigger=PropertyChanged}" Name="inputSearch" InfoText="Search for..." SearchMode="Manual" ShowHistory="True" SuggestionSource="{Binding SearchSuggestions}" >
+                            <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" 
+                                                    Text="{Binding QueryViewModel.QueryText, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Name="inputSearch" 
+                                                    InfoText="Search for..." 
+                                                    SearchMode="Manual" 
+                                                    ShowHistory="True" 
+                                                    SuggestionSource="{Binding QueryViewModel.Suggestions}" >
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Search">
                                         <i:InvokeCommandAction Command="{Binding QueryViewModel.Search}"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="TextChanged">
-                                        <i:InvokeCommandAction Command="{Binding SuggestCommand}"/>
+                                        <i:InvokeCommandAction Command="{Binding QueryViewModel.Suggest}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                                 <controls:SearchTextBox.SuggestionItemTemplate>

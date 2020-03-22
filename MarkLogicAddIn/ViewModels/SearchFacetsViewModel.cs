@@ -1,4 +1,5 @@
-﻿using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
+﻿using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Collections.Generic;
@@ -13,21 +14,24 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchFacetsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<BeginSearchMessage>(m => 
+            MessageBus.Subscribe<BuildSearchMessage>(m => 
             {
                 SelectedFacets = Facets.SelectMany(f => f.Values).Where(v => v.Selected).ToList(); // save selected facets
                 SelectedFacets.ForEach(v => m.Query.AddFacetValue(v.FacetName, v.ValueName)); // add facets to query
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                Facets.Clear();
-                foreach(var facet in m.Results.Facets.Values)
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results))
                 {
-                    var viewModel = new FacetViewModel(facet);
-                    viewModel.Values.ToList().ForEach(fv => fv.Selected = SelectedFacets.Any(sf => sf.Equals(fv)));
-                    Facets.Add(viewModel);
+                    Facets.Clear();
+                    foreach (var facet in m.Results.Facets.Values)
+                    {
+                        var viewModel = new FacetViewModel(facet);
+                        viewModel.Values.ToList().ForEach(fv => fv.Selected = SelectedFacets.Any(sf => sf.Equals(fv)));
+                        Facets.Add(viewModel);
+                    }
+                    SelectedFacets = null; // clear previously saved
                 }
-                SelectedFacets = null; // clear previously saved
             });
             Facets = new ObservableCollection<FacetViewModel>();
             SelectedFacets = new List<FacetValueViewModel>();

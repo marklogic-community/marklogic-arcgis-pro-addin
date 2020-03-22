@@ -1,16 +1,15 @@
 ﻿using MarkLogic.Client.Search;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
-using System;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages
 {
     public class BeginSearchMessage : Message
     {
-        public BeginSearchMessage(SearchQuery query)
+        public BeginSearchMessage(ReturnOptions returnOptions)
         {
-            Query = query ?? throw new ArgumentNullException("query");
+            ReturnOptions = returnOptions;
         }
 
-        public SearchQuery Query { get; private set; }
+        public ReturnOptions ReturnOptions { get; private set; }
     }
 }

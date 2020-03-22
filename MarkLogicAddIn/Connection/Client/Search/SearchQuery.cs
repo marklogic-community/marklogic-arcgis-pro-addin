@@ -4,17 +4,37 @@ using System.Collections.Generic;
 
 namespace MarkLogic.Client.Search
 {
+    [Flags]
+    public enum ReturnOptions
+    {
+        Results = 1,
+        Facets = 2,
+        Values = 4,
+        Suggest = 8
+    }
+
     public class SearchQuery
     {
-        private Dictionary<string, HashSet<string>> _facets;
+        public const ReturnOptions DefaultReturnOptions = ReturnOptions.Results | ReturnOptions.Facets | ReturnOptions.Values;
+
+        private Dictionary<string, HashSet<string>> _facets = new Dictionary<string, HashSet<string>>();
 
         public SearchQuery()
         {
-            _facets = new Dictionary<string, HashSet<string>>();
+            // defaults
+            ReturnOptions = DefaultReturnOptions;
+            Start = 1;
+            PageLength = 10;
             AggregateValues = true;
             ValuesLimit = 0;
             MaxLonDivs = MaxLatDivs = 100;
         }
+
+        public ReturnOptions ReturnOptions { get; set; }
+
+        public long Start { get; set; }
+
+        public int PageLength { get; set; }
 
         public string QueryText { get; set; }
 

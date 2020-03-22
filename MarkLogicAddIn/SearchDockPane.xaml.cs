@@ -31,50 +31,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public SearchDockPaneView()
         {
             InitializeComponent();
-            //DataContextChanged += SearchDockPaneView_DataContextChanged;
         }
-
-        /*private void SearchDockPaneView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.OldValue != null)
-            {
-                Debug.Assert(e.OldValue is INotifyPropertyChanged);
-                (e.OldValue as INotifyPropertyChanged).PropertyChanged -= DataContext_PropertyChanged;
-            }
-            if (e.NewValue != null)
-            {
-                Debug.Assert(e.NewValue is INotifyPropertyChanged);
-                (e.NewValue as INotifyPropertyChanged).PropertyChanged += DataContext_PropertyChanged;
-            }
-        }
-
-        private void DataContext_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "RequiresAuthorization" && (DataContext as SearchDockPaneViewModel).RequiresAuthorization)
-                PromptForCredentials((SearchDockPaneViewModel)DataContext);
-        }
-
-        private void PromptForCredentials(SearchDockPaneViewModel viewModel)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                CredentialsWindow dlg = new CredentialsWindow();
-                dlg.ConnectionProfile = viewModel.ConnectionProfile;
-                dlg.Owner = Application.Current.MainWindow;
-                var dlgResult = dlg.ShowDialog();
-                if (dlgResult.HasValue)
-                {
-                    if (dlgResult.Value == true)
-                    {
-                        var credentials = new NetworkCredential(dlg.Username, dlg.Password);
-                        viewModel.SetCredentialsCommand.Execute(credentials);
-                    }
-                    else
-                        viewModel.DisconnectCommand.Execute(null); // reset
-                }
-                dlg.Close();
-            });
-        }*/
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {

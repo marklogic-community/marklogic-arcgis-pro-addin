@@ -29,7 +29,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         protected SearchDockPaneViewModel()
         {
             var messageBus = AddInModule.Current.MessageBus;
-            messageBus.Subscribe<BeginSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
+            messageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
 
             ConnectionViewModel = new SearchConnectionViewModel(messageBus);
             ConnectionViewModel.ConnectionProfiles.CollectionChanged += (o, e) => ResolveSearchModelState();

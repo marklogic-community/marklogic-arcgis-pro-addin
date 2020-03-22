@@ -10,15 +10,35 @@ namespace MarkLogic.Client.Search
     public class SearchResults
     {
         private JObject _response;
-        private IDictionary<string, Facet> _facets = null;
-        private List<SearchResult> _results = null;
+        private IDictionary<string, Facet> _facets;
+        private List<SearchResult> _results;
+        private List<string> _suggestions;
 
-        public SearchResults(string responseContent)
+        public SearchResults(string responseContent, ReturnOptions returnOptions)
         {
             RawContent = responseContent;
             var json = JsonConvert.DeserializeObject(responseContent);
             Debug.Assert(json != null && json.GetType() == typeof(JObject));
             _response = (JObject)json;
+            ReturnOptions = returnOptions;
+        }
+
+        private static List<SearchResult> ReadResults(JObject response)
+        {
+            var list = new List<SearchResult>();
+            var results = response.Value<JArray>("results");
+            if (results != null && results.HasValues)
+                list.AddRange(results.Values<JObject>().Select(o => new SearchResult(o)));
+            return list;
+        }
+
+        private static List<string> ReadSuggestions(JObject response)
+        {
+            var list = new List<string>();
+            var suggestions = response.Value<JArray>("suggestions");
+            if (suggestions != null && suggestions.HasValues)
+                list.AddRange(suggestions.Values<string>());
+            return list;
         }
 
         private static IDictionary<string, Facet> ReadFacets(JObject response)
@@ -38,16 +58,9 @@ namespace MarkLogic.Client.Search
             return map;
         }
 
-        private static List<SearchResult> ReadResults(JObject response)
-        {
-            var list = new List<SearchResult>();
-            var results = response.Value<JArray>("results");
-            if (results != null && results.HasValues)
-                list.AddRange(results.Values<JObject>().Select(o => new SearchResult(o)));
-            return list;
-        }
-
         public string RawContent { get; private set; }
+
+        public ReturnOptions ReturnOptions { get; private set; }
 
         public long Total { get { return _response.Value<long>("total"); } }
 
@@ -55,9 +68,11 @@ namespace MarkLogic.Client.Search
 
         public long Start { get { return _response.Value<long>("start"); } }
 
-        public IDictionary<string, Facet> Facets { get { return _facets ?? (_facets = ReadFacets(_response)); } }
-
         public IEnumerable<SearchResult> Results => _results ?? (_results = ReadResults(_response));
+
+        public IEnumerable<string> QuerySuggestions => _suggestions ?? (_suggestions = ReadSuggestions(_response));
+
+        public IDictionary<string, Facet> Facets => _facets ?? (_facets = ReadFacets(_response));
 
         public bool IsFirstPage
         {
