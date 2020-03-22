@@ -1,7 +1,7 @@
 ﻿using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
-using MarkLogic.Extensions.Koop;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -13,43 +13,38 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchQueryViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<ConnectionProfileChangedMessage>(m => ConnectionProfile = m.Profile);
-            MessageBus.Subscribe<ServiceModelChangedMessage>(m => ServiceModel = m.ServiceModel);
             MessageBus.Subscribe<BuildSearchMessage>(m =>
             {
                 m.Query.QueryText = QueryText;
             });
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
-                if (m.ReturnOptions.HasFlag(ReturnOptions.Results))
-                {
-                    IsSearching = true;
+                IsSearching = true;
+                if (m.ReturnOptions.HasFlag(ReturnOptions.Results) && !m.IsPaging)
                     StatusMessage = "Searching...";
-                }
                 if (m.ReturnOptions.HasFlag(ReturnOptions.Suggest))
                     Suggestions.Clear();
 
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results))
-                {
+                IsSearching = false;
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results) && !m.IsPaging)
                     StatusMessage = $"Matched {m.Results.Total,1:n0} documents and {m.Results.TotalObjects,1:n0} distinct objects.";
-                    IsSearching = false;
-                }
                 if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Suggest))
                 {
                     foreach (var suggestion in m.Results.QuerySuggestions)
                         Suggestions.Add(suggestion);
                 }
             });
+            MessageBus.Subscribe<SearchAbortedMessage>(m =>
+            {
+                IsSearching = false;
+                StatusMessage = "Search aborted.";
+            });
         }
 
         protected MessageBus MessageBus { get; private set; }
-
-        protected ConnectionProfile ConnectionProfile { get; private set; }
-
-        protected IServiceModel ServiceModel { get; private set; }
 
         private bool _isSearching;
         public bool IsSearching
@@ -79,15 +74,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         }
 
         private SearchCommand _cmdSearch;
-        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus, e =>
-        {
-            IsSearching = false;
-            StatusMessage = "Search aborted.";
-        }));
+        public ICommand Search => _cmdSearch ?? (_cmdSearch = new SearchCommand(MessageBus));
 
         public ObservableCollection<string> Suggestions { get; } = new ObservableCollection<string>();
 
         private SearchCommand _cmdSuggest;
-        public ICommand Suggest => _cmdSuggest ?? (_cmdSuggest = new SearchCommand(MessageBus, null, ReturnOptions.Suggest));
+        public ICommand Suggest => _cmdSuggest ?? (_cmdSuggest = new SearchCommand(MessageBus, ReturnOptions.Suggest));
     }
 }

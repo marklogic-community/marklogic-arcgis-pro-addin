@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.DocumentPanel"
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.Controls.DocumentPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -15,7 +15,13 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True" KeyboardNavigation.TabNavigation="Local">
-        <TextBlock DockPanel.Dock="Top" Style="{DynamicResource Esri_TextBlockH3}" Text="{Binding DocumentUri}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding DocumentUri}" Margin="3,3,3,5"/>
+        <TextBlock DockPanel.Dock="Top" 
+                   Style="{DynamicResource Esri_TextBlockH3}" 
+                   Text="{Binding DocumentUri}" 
+                   TextWrapping="NoWrap" 
+                   TextTrimming="CharacterEllipsis" 
+                   ToolTip="{Binding DocumentUri}" 
+                   Margin="3,3,3,5"/>
         <WebBrowser local:SearchResultsDockPaneView.Html="{Binding FormattedContent}"/>
     </DockPanel>
 </UserControl>

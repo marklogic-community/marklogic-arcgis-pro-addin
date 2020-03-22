@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace MarkLogic.Esri.ArcGISPro.AddIn
+namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 {
     public class ServerCommand : ICommand
     {
@@ -25,7 +25,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         protected Action<Exception> ErrorCallback { get; set; }
 
-        public virtual event EventHandler CanExecuteChanged
+        public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
@@ -55,6 +55,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                     if (!retry)
                         ErrorCallback?.Invoke(e);
                 }
+                // TODO: add handler for network exceptions
                 catch (Exception e)
                 {
                     e.HandleAsUserNotification();

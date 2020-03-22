@@ -28,22 +28,23 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         protected SearchDockPaneViewModel()
         {
-            var messageBus = AddInModule.Current.MessageBus;
-            messageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
+            var module = AddInModule.Instance;
+            module.MessageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
 
-            ConnectionViewModel = new SearchConnectionViewModel(messageBus);
+            ConnectionViewModel = module.GetMainViewModel<SearchConnectionViewModel>();
+            QueryViewModel = module.GetMainViewModel<SearchQueryViewModel>();
+            FacetsViewModel = module.GetMainViewModel<SearchFacetsViewModel>();
+            OptionsViewModel = module.GetMainViewModel<SearchOptionsViewModel>();
+            SymbologyViewModel = module.GetMainViewModel<SymbologyOptionsViewModel>();
+            MapOverlay = new MapOverlayManager(module.MessageBus);
+
             ConnectionViewModel.ConnectionProfiles.CollectionChanged += (o, e) => ResolveSearchModelState();
             ConnectionViewModel.PropertyChanged += (o, e) => 
             {
                 if (e.PropertyName == nameof(ConnectionViewModel.Connected)) 
                     ResolveSearchModelState(); 
             };
-            QueryViewModel = new SearchQueryViewModel(messageBus);
-            FacetsViewModel = new SearchFacetsViewModel(messageBus);
-            OptionsViewModel = new SearchOptionsViewModel(messageBus);
-            SymbologyViewModel = new SymbologyOptionsViewModel(messageBus);
-            MapOverlay = new MapOverlayManager(messageBus);
-
+            
             ActiveMapViewChangedEvent.Subscribe(e => ResolveSearchModelState());
             MapViewCameraChangedEvent.Subscribe(e =>
             {
@@ -107,7 +108,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
     {
         protected override void OnClick()
         {
-            DockPane pane = FrameworkApplication.DockPaneManager.Find(SearchDockPaneViewModel.DockPaneId);
+            var pane = FrameworkApplication.DockPaneManager.Find(SearchDockPaneViewModel.DockPaneId);
             pane?.Activate();
         }
     }

@@ -1,4 +1,5 @@
-﻿using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
+﻿using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using MarkLogic.Extensions.Koop;
 using System;
@@ -14,7 +15,13 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchConnectionViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            ConnectionProfiles = AddInModule.Current.RegisteredConnectionProfiles;
+            MessageBus.Subscribe<GetServerSettingsMessage>(m =>
+            {
+                m.Profile = SelectedConnectionProfile;
+                m.ServiceModel = SelectedServiceModel;
+                m.Resolved = true;
+            });
+            ConnectionProfiles = AddInModule.Instance.RegisteredConnectionProfiles;
             ServiceModels = new ObservableCollection<IServiceModel>();
         }
 
@@ -32,7 +39,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 if (SetProperty(ref _selectedConnProfile, value))
                 {
                     NotifyPropertyChanged(nameof(HasSelectedProfile));
-                    MessageBus.Publish(new ConnectionProfileChangedMessage(value)).Wait();
+                    MessageBus.Publish(new ServerSettingsChangedMessage(value, SelectedServiceModel)).Wait();
                 }
             }
         }
@@ -66,7 +73,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 if (SetProperty(ref _selectedServiceModel, value))
                 {
                     NotifyPropertyChanged(nameof(HasSelectedServiceModel));
-                    MessageBus.Publish(new ServiceModelChangedMessage(value)).Wait();
+                    MessageBus.Publish(new ServerSettingsChangedMessage(SelectedConnectionProfile, value)).Wait();
                 }
             }
         }

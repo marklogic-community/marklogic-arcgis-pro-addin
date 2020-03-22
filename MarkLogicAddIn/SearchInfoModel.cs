@@ -1,5 +1,6 @@
 ﻿using ArcGIS.Desktop.Framework;
 using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
+    <Compile Include="Commands\PageSearchCommand.cs" />
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
@@ -112,11 +113,12 @@
     <Compile Include="Controls\SearchOptionsPanel.xaml.cs">
       <DependentUpon>SearchOptionsPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\EmptyArrayToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumToVisibilityConverter.cs" />
     <Compile Include="Map\PointClusterCollection.cs" />
     <Compile Include="Map\PointCollection.cs" />
     <Compile Include="Map\IPointSymbology.cs" />
-    <Compile Include="SearchCommand.cs" />
+    <Compile Include="Commands\SearchCommand.cs" />
     <Compile Include="Connection\Client\Document\Document.cs" />
     <Compile Include="Connection\Client\Document\DocumentService.cs" />
     <Compile Include="Connection\Client\Search\Query\ConstraintQuery.cs" />
@@ -136,7 +138,7 @@
     <Compile Include="Connection\Extensions\Koop\SearchServiceProfile.cs" />
     <Compile Include="Connection\Extensions\Koop\CreateFeatureLayerOptions.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModel.cs" />
-    <Compile Include="DocumentPanel.xaml.cs">
+    <Compile Include="Controls\DocumentPanel.xaml.cs">
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="DocumentPanelViewModel.cs" />
@@ -144,7 +146,7 @@
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Messaging\Message.cs" />
     <Compile Include="Messaging\MessageBus.cs" />
-    <Compile Include="ResultsPanel.xaml.cs">
+    <Compile Include="Controls\ResultsPanel.xaml.cs">
       <DependentUpon>ResultsPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSearchViewModel.cs" />
@@ -187,8 +189,9 @@
       <DependentUpon>SearchResultsDockPane.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
-    <Compile Include="ResultsPanelViewModel.cs" />
-    <Compile Include="ServerCommand.cs" />
+    <Compile Include="ViewModels\Messages\SearchAbortedMessage.cs" />
+    <Compile Include="ViewModels\SearchResultsViewModel.cs" />
+    <Compile Include="Commands\ServerCommand.cs" />
     <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
     <Compile Include="ViewModels\Messages\GetSymbologyMessage.cs" />
     <Compile Include="ViewModels\Messages\RedrawMessage.cs" />
@@ -196,9 +199,9 @@
     <Compile Include="ViewModels\FacetValueViewModel.cs" />
     <Compile Include="ViewModels\FacetViewModel.cs" />
     <Compile Include="ViewModels\Messages\BuildSearchMessage.cs" />
-    <Compile Include="ViewModels\Messages\ConnectionProfileChangedMessage.cs" />
+    <Compile Include="ViewModels\Messages\ServerSettingsChangedMessage.cs" />
     <Compile Include="ViewModels\Messages\EndSearchMessage.cs" />
-    <Compile Include="ViewModels\Messages\ServiceModelChangedMessage.cs" />
+    <Compile Include="ViewModels\Messages\GetServerSettingsMessage.cs" />
     <Compile Include="ViewModels\SearchConnectionViewModel.cs" />
     <Compile Include="Settings\ConnectionProfileList.cs" />
     <Compile Include="Settings\ServerDetailsWindow.xaml.cs">
@@ -208,7 +211,7 @@
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsViewModel.cs" />
-    <Compile Include="ViewModelBase.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\SearchFacetsViewModel.cs" />
     <Compile Include="ViewModels\SearchOptionsViewModel.cs" />
     <Compile Include="ViewModels\SearchQueryViewModel.cs" />
@@ -239,11 +242,11 @@
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
-    <Page Include="DocumentPanel.xaml">
+    <Page Include="Controls\DocumentPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ResultsPanel.xaml">
+    <Page Include="Controls\ResultsPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

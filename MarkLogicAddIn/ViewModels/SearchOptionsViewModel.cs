@@ -1,4 +1,5 @@
-﻿using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
+﻿using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Windows.Input;

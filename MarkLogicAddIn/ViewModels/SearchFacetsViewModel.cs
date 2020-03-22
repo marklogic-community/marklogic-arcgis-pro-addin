@@ -1,4 +1,5 @@
 ﻿using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
@@ -21,7 +22,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results))
+                if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Facets))
                 {
                     Facets.Clear();
                     foreach (var facet in m.Results.Facets.Values)

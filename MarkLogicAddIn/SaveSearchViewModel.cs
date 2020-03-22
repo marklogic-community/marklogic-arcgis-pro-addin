@@ -1,4 +1,5 @@
 ﻿using MarkLogic.Esri.ArcGISPro.AddIn.Feature;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
 using MarkLogic.Extensions.Koop;
 using System;
 using System.Collections.Generic;

@@ -68,7 +68,7 @@ namespace MarkLogic.Client.Search
 
         public long Start { get { return _response.Value<long>("start"); } }
 
-        public IEnumerable<SearchResult> Results => _results ?? (_results = ReadResults(_response));
+        public IEnumerable<SearchResult> DocumentResults => _results ?? (_results = ReadResults(_response));
 
         public IEnumerable<string> QuerySuggestions => _suggestions ?? (_suggestions = ReadSuggestions(_response));
 

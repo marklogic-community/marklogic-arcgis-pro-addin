@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MarkLogic.Esri.ArcGISPro.AddIn
+namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 {
     /// <summary>
     /// Interaction logic for DocumentPanel.xaml

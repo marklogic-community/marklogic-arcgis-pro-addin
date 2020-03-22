@@ -14,13 +14,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
     internal class SearchResultsDockPaneViewModel : DockPane
     {
-        private const string _dockPaneID = "MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane";
+        public const string DockPaneId = "MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane";
 
         protected SearchResultsDockPaneViewModel()
         {
+            var module = AddInModule.Instance;
+
             Tabs.Add(new TabControl() { Text = "Search Results", Tooltip = "Search Results" });
             Tabs.Add(new TabControl() { Text = "Document", Tooltip = "Document" });
-            ResultsViewModel = new ResultsPanelViewModel();
+
+            ResultsViewModel = module.GetMainViewModel<SearchResultsViewModel>();
             DocumentViewModel = new DocumentPanelViewModel();
             _selectedTabIndex = 0;
         }
@@ -47,23 +50,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public bool IsDocumentTabSelected => SelectedTabIndex == 1;
 
-        public ResultsPanelViewModel ResultsViewModel { get; private set; }
+        public SearchResultsViewModel ResultsViewModel { get; private set; }
 
         public DocumentPanelViewModel DocumentViewModel { get; private set; }
 
-        /// <summary>
-        /// Show the DockPane.
-        /// </summary>
-        internal static SearchResultsDockPaneViewModel Show()
-        {
-            var pane = FrameworkApplication.DockPaneManager.Find(_dockPaneID) as SearchResultsDockPaneViewModel;
-            if (pane == null)
-                return null;
-            pane.Activate();
-            return pane;
-        }
-
-        internal static void ShowResults(SearchDockPaneViewModel searchViewModel)
+        /*internal static void ShowResults(SearchDockPaneViewModel searchViewModel)
         {
             var pane = Show();
             if (pane == null)
@@ -84,21 +75,19 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         internal static void ResetDocument()
         {
-            var pane = FrameworkApplication.DockPaneManager.Find(_dockPaneID) as SearchResultsDockPaneViewModel;
+            var pane = FrameworkApplication.DockPaneManager.Find(DockPaneId) as SearchResultsDockPaneViewModel;
             if (pane == null)
                 return;
             pane.DocumentViewModel.Reset();
-        }
+        }*/
     }
 
-    /// <summary>
-    /// Button implementation to show the DockPane.
-    /// </summary>
     internal class SearchResultsDockPane_ShowButton : Button
     {
         protected override void OnClick()
         {
-            SearchResultsDockPaneViewModel.Show();
+            var pane = FrameworkApplication.DockPaneManager.Find(SearchResultsDockPaneViewModel.DockPaneId);
+            pane?.Activate();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SymbologyOptionsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
-            MessageBus.Subscribe<ServiceModelChangedMessage>(m =>
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m =>
             {
                 Items.Clear();
                 if (m.ServiceModel != null)
