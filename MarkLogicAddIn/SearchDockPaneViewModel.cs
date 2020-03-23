@@ -5,12 +5,15 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using MarkLogic.Client.Search.Query;
+using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
 using MarkLogic.Esri.ArcGISPro.AddIn.Map;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
@@ -29,7 +32,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         protected SearchDockPaneViewModel()
         {
             var module = AddInModule.Instance;
-            module.MessageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
+            MessageBus = module.MessageBus;
+            MessageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
 
             ConnectionViewModel = module.GetMainViewModel<SearchConnectionViewModel>();
             QueryViewModel = module.GetMainViewModel<SearchQueryViewModel>();
@@ -53,6 +57,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             });
         }
 
+        private MessageBus MessageBus { get; set; }
+
         public SearchConnectionViewModel ConnectionViewModel { get; private set; }
 
         public SearchQueryViewModel QueryViewModel { get; private set; }
@@ -64,6 +70,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public SymbologyOptionsViewModel SymbologyViewModel { get; private set; }
 
         public MapOverlayManager MapOverlay { get; private set; }
+
+        public ShowSearchHelpCommand _cmdShowSearchHelp;
+        public ICommand ShowSearchHelp => _cmdShowSearchHelp ?? (_cmdShowSearchHelp = new ShowSearchHelpCommand(MessageBus));
 
         public SearchModelState State { get; private set; }
 

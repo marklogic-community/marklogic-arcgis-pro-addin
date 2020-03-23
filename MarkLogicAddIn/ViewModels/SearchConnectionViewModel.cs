@@ -22,7 +22,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                 m.Resolved = true;
             });
             ConnectionProfiles = AddInModule.Instance.RegisteredConnectionProfiles;
-            ServiceModels = new ObservableCollection<IServiceModel>();
+            ServiceModels = new ObservableCollection<ServiceModel>();
         }
 
         protected MessageBus MessageBus { get; private set; }
@@ -46,7 +46,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 
         public bool HasSelectedProfile => SelectedConnectionProfile != null;
 
-        public ObservableCollection<IServiceModel> ServiceModels { get; private set; }
+        public ObservableCollection<ServiceModel> ServiceModels { get; private set; }
 
         private ServerCommand _cmdGetServiceModels;
         public ICommand GetServiceModels => _cmdGetServiceModels ?? (_cmdGetServiceModels = new ServerCommand(
@@ -64,8 +64,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             o => HasSelectedProfile,
             e => Connecting = false));
 
-        private IServiceModel _selectedServiceModel;
-        public IServiceModel SelectedServiceModel
+        private ServiceModel _selectedServiceModel;
+        public ServiceModel SelectedServiceModel
         {
             get { return _selectedServiceModel; }
             set

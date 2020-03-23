@@ -104,6 +104,8 @@
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
     <Compile Include="Commands\PageSearchCommand.cs" />
+    <Compile Include="Commands\ShowSearchHelpCommand.cs" />
+    <Compile Include="Connection\Extensions\Koop\ServiceModelConstraint.cs" />
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
@@ -132,7 +134,6 @@
     <Compile Include="Connection\Extensions\Koop\FeatureLayerItem.cs" />
     <Compile Include="Connection\Extensions\Koop\FeatureLayerResults.cs" />
     <Compile Include="Connection\Extensions\Koop\FeatureServerProfile.cs" />
-    <Compile Include="Connection\Extensions\Koop\IServiceModel.cs" />
     <Compile Include="Connection\Extensions\Koop\SearchServicesResults.cs" />
     <Compile Include="Connection\Extensions\Koop\KoopService.cs" />
     <Compile Include="Connection\Extensions\Koop\SearchServiceProfile.cs" />
@@ -142,7 +143,6 @@
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DocumentViewModel.cs" />
-    <Compile Include="DropDownButtonBehavior.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Messaging\Message.cs" />
     <Compile Include="Messaging\MessageBus.cs" />
@@ -181,9 +181,9 @@
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
-    <Compile Include="SearchInfoModel.cs" />
-    <Compile Include="SearchInfoWindow.xaml.cs">
-      <DependentUpon>SearchInfoWindow.xaml</DependentUpon>
+    <Compile Include="ViewModels\SearchHelpViewModel.cs" />
+    <Compile Include="Controls\SearchHelpWindow.xaml.cs">
+      <DependentUpon>SearchHelpWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchResultsDockPane.xaml.cs">
       <DependentUpon>SearchResultsDockPane.xaml</DependentUpon>
@@ -267,7 +267,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SearchInfoWindow.xaml">
+    <Page Include="Controls\SearchHelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

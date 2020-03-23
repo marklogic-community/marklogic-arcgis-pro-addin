@@ -2,17 +2,16 @@
 
 namespace MarkLogic.Extensions.Koop
 {
-    public class ServiceModel : IServiceModel
+    public class ServiceModel
     {
-        private string[] _valueNames;
-
-        internal ServiceModel(string id, string name, string description, string[] valueNames, string docTransform)
+        internal ServiceModel(string id, string name, string description, IEnumerable<string> valueNames, string docTransform, IEnumerable<ServiceModelConstraint> constraints)
         {
             Id = id;
             Name = name;
             Description = description;
-            _valueNames = valueNames;
+            ValueNames = new List<string>(valueNames);
             DocTransform = docTransform;
+            Constraints = new List<ServiceModelConstraint>(constraints);
         }
 
         public string Id { get; private set; }
@@ -21,8 +20,10 @@ namespace MarkLogic.Extensions.Koop
 
         public string Description { get; private set; }
 
-        public IEnumerable<string> ValueNames => _valueNames;
+        public IEnumerable<string> ValueNames { get; private set; }
 
         public string DocTransform { get; private set; }
+
+        public IEnumerable<ServiceModelConstraint> Constraints { get; private set; }
     }
 }

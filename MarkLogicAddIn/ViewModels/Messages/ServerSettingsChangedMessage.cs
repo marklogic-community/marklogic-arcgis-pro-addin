@@ -5,7 +5,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages
 {
     public class ServerSettingsChangedMessage : Message
     {
-        public ServerSettingsChangedMessage(ConnectionProfile connProfile, IServiceModel serviceModel)
+        public ServerSettingsChangedMessage(ConnectionProfile connProfile, ServiceModel serviceModel)
         {
             Profile = connProfile;
             ServiceModel = serviceModel;
@@ -13,6 +13,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages
 
         public ConnectionProfile Profile { get; private set; }
 
-        public IServiceModel ServiceModel { get; private set; }
+        public ServiceModel ServiceModel { get; private set; }
     }
 }

@@ -11,6 +11,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages
 
         public ConnectionProfile Profile { get; set; }
 
-        public IServiceModel ServiceModel { get; set; }
+        public ServiceModel ServiceModel { get; set; }
     }
 }

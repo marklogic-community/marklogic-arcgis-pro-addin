@@ -23,7 +23,7 @@ namespace MarkLogic.Client.Search
 
         public static SearchService Instance => _instance ?? (_instance = new SearchService());
 
-        public async Task<SearchResults> Search(Connection connection, SearchQuery query, IServiceModel serviceModel)
+        public async Task<SearchResults> Search(Connection connection, SearchQuery query, ServiceModel serviceModel)
         {
             var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/geoSearchService" };
 

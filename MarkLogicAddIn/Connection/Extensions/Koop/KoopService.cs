@@ -14,7 +14,7 @@ namespace MarkLogic.Extensions.Koop
 {
     public class KoopService
     {
-        public static async Task<IEnumerable<IServiceModel>> GetServiceModels(Connection connection)
+        public static async Task<IEnumerable<ServiceModel>> GetServiceModels(Connection connection)
         {
             var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/modelService", Query = "rs:filter=search" };
             using (var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri))
@@ -31,7 +31,9 @@ namespace MarkLogic.Extensions.Koop
                             m.Value<string>("name"),
                             m.Value<string>("description"),
                             m.Value<JArray>("valueNames").Values<string>().ToArray(),
-                            m.Value<string>("docTransform")));
+                            m.Value<string>("docTransform"),
+                            m.Value<JArray>("constraints").Values<JObject>().Select(o => new ServiceModelConstraint(o.Value<string>("name"), o.Value<string>("description")))
+                        ));
                     }
                     catch(Exception e)
                     {

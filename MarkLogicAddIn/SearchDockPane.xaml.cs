@@ -23,9 +23,6 @@ using System.Windows.Shapes;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
-    /// <summary>
-    /// Interaction logic for SearchDockPaneView.xaml
-    /// </summary>
     public partial class SearchDockPaneView : UserControl
     {
         public SearchDockPaneView()
@@ -51,21 +48,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
             if (dlgResult.HasValue && dlgResult.Value == true)
                 viewModel.SaveToNewLayerCommand.Execute(dlg.DataContext as ISaveSearchOptions);*/
-        }
-
-        private void SearchInfoButton_Click(object sender, RoutedEventArgs e)
-        {
-            var viewModel = (SearchDockPaneViewModel)DataContext;
-
-            Debug.Assert(viewModel != null);
-            //Debug.Assert(viewModel.HasQueryOptions); TODO: replace
-
-            var model = new SearchInfoModel();
-            //model.Initialize(viewModel.QueryOptions, viewModel); TODO: replace
-
-            var dlg = new SearchInfoWindow();
-            dlg.DataContext = model;
-            dlg.Show();
         }
 
         private async void ServiceModels_SelectionChanged(object sender, SelectionChangedEventArgs e)
