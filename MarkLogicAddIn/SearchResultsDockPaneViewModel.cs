@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.ObjectModel;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Controls;
-using MarkLogic.Client.Document;
+using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
@@ -19,13 +14,28 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         protected SearchResultsDockPaneViewModel()
         {
             var module = AddInModule.Instance;
+            var messageBus = module.MessageBus;
+            messageBus.Subscribe<EndSearchMessage>(m =>
+            {
+                if (!m.Results.ReturnOptions.HasFlag(ReturnOptions.Results))
+                    return;
+                // show results pane
+                Activate();
+                SelectedTabIndex = 0;
+            });
+            messageBus.Subscribe<ViewDocumentMessage>(m =>
+            {
+                // show document pane
+                Activate();
+                SelectedTabIndex = 1;
+            });
 
             Tabs.Add(new TabControl() { Text = "Search Results", Tooltip = "Search Results" });
             Tabs.Add(new TabControl() { Text = "Document", Tooltip = "Document" });
+            _selectedTabIndex = 0;
 
             ResultsViewModel = module.GetMainViewModel<SearchResultsViewModel>();
-            DocumentViewModel = new DocumentPanelViewModel();
-            _selectedTabIndex = 0;
+            DocumentViewModel = module.GetMainViewModel<DocumentViewModel>();
         }
 
         private ObservableCollection<TabControl> _tabs;
@@ -52,34 +62,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public SearchResultsViewModel ResultsViewModel { get; private set; }
 
-        public DocumentPanelViewModel DocumentViewModel { get; private set; }
-
-        /*internal static void ShowResults(SearchDockPaneViewModel searchViewModel)
-        {
-            var pane = Show();
-            if (pane == null)
-                return;
-            pane.SelectedTabIndex = 0;
-            pane.ResultsViewModel.Set(searchViewModel);
-        }
-
-        internal static void ShowDocument(ConnectionProfile connProfile = null, string documentUri = null, string docTransform = null)
-        {
-            var pane = Show();
-            if (pane == null)
-                return;
-            pane.SelectedTabIndex = 1;
-            if (connProfile != null && !string.IsNullOrWhiteSpace(documentUri))
-                pane.DocumentViewModel.FetchDocument(connProfile, documentUri, docTransform);
-        }
-
-        internal static void ResetDocument()
-        {
-            var pane = FrameworkApplication.DockPaneManager.Find(DockPaneId) as SearchResultsDockPaneViewModel;
-            if (pane == null)
-                return;
-            pane.DocumentViewModel.Reset();
-        }*/
+        public DocumentViewModel DocumentViewModel { get; private set; }
     }
 
     internal class SearchResultsDockPane_ShowButton : Button

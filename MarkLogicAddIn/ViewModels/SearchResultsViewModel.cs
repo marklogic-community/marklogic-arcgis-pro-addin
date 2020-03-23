@@ -63,8 +63,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             set { SetProperty(ref _totalPages, value); }
         }
 
-        private SearchCommand _cmdSelectResult;
-        public ICommand SelectResult => _cmdSelectResult ?? (_cmdSelectResult = new SearchCommand(MessageBus));
+        private ServerCommand _cmdSelectResult;
+        public ICommand SelectResult => _cmdSelectResult ?? (_cmdSelectResult = new ServerCommand(o => MessageBus.Publish(new ViewDocumentMessage(o.ToString()))));
 
         private PageSearchCommand _cmdPagePrev;
         public ICommand PagePrev => _cmdPagePrev ?? (_cmdPagePrev = new PageSearchCommand(MessageBus, () => PrevStart, o => !IsFirstPage));

@@ -41,7 +41,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 new SearchFacetsViewModel(MessageBus),
                 new SearchOptionsViewModel(MessageBus),
                 new SearchResultsViewModel(MessageBus),
-                new SymbologyOptionsViewModel(MessageBus)
+                new SymbologyOptionsViewModel(MessageBus),
+                new DocumentViewModel(MessageBus)
             };
             foreach (var viewModel in viewModels)
                 MainViewModels.Add(viewModel.GetType(), viewModel);

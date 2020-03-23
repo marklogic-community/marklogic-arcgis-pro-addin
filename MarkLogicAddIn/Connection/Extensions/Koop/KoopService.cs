@@ -30,7 +30,8 @@ namespace MarkLogic.Extensions.Koop
                             m.Value<string>("id"),
                             m.Value<string>("name"),
                             m.Value<string>("description"),
-                            m.Value<JArray>("valueNames").Values<string>().ToArray()));
+                            m.Value<JArray>("valueNames").Values<string>().ToArray(),
+                            m.Value<string>("docTransform")));
                     }
                     catch(Exception e)
                     {
@@ -39,21 +40,6 @@ namespace MarkLogic.Extensions.Koop
                 }
             }
         }
-
-        /*public static async Task<SearchServicesResults> SearchServices(Connection connection)
-        {
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/KoopSearchServices" };
-            using (var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri))
-            {
-                using (var response = await connection.SendAsync(msg))
-                {
-                    response.EnsureSuccessStatusCode();
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var results = new SearchServicesResults(responseContent);
-                    return results;
-                }
-            }
-        }*/
 
         private const string KoopFeatureLayerPath = "v1/resources/KoopFeatureLayer";
 

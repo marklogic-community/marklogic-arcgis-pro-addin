@@ -11,5 +11,7 @@ namespace MarkLogic.Extensions.Koop
         string Description { get; }
 
         IEnumerable<string> ValueNames { get; }
+
+        string DocTransform { get; }
     }
 }

@@ -1,18 +1,16 @@
-﻿using ArcGIS.Desktop.Framework;
-using MarkLogic.Client.Document;
+﻿using MarkLogic.Client.Document;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
-    public class DocumentPanelViewModel : ViewModelBase
+    public class DocumentViewModel : ViewModelBase
     {
-        private const string _noDocHtml = @"
+        private const string NoDocHTML = @"
         <html>
             <body>
                 <div style=""font-family:Arial;padding-top:100px;text-align:center"">
@@ -21,10 +19,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             </body>
         </html>";
 
-        public DocumentPanelViewModel()
+        public DocumentViewModel(MessageBus messageBus)
         {
+            MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<ViewDocumentMessage>(m => ViewDocument(m.DocumentUri));
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m => Reset());
+            MessageBus.Subscribe<BeginSearchMessage>(m => Reset());
             Reset();
         }
+
+        protected MessageBus MessageBus { get; private set; }
 
         private bool _isFetching;
         public bool IsFetching
@@ -50,24 +54,33 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public void Reset()
         {
             DocumentUri = null;
-            FormattedContent = _noDocHtml;
+            FormattedContent = NoDocHTML;
         }
 
-        public async void FetchDocument(ConnectionProfile connProfile, string documentUri, string transform)
+        private async Task ViewDocument(string documentUri)
         {
             try
             {
                 IsFetching = true;
-                var conn = ConnectionService.Instance.Create(connProfile);
 
-                var document = await DocumentService.Instance.Fetch(conn, documentUri, transform);
+                var serverMsg = new GetServerSettingsMessage();
+                await MessageBus.Publish(serverMsg);
+                Debug.Assert(serverMsg.Resolved);
+                if (!serverMsg.Resolved)
+                {
+                    Reset();
+                    return;
+                }
+
+                var conn = ConnectionService.Instance.Create(serverMsg.Profile);
+                var document = await DocumentService.Instance.Fetch(conn, documentUri, serverMsg.ServiceModel.DocTransform);
 
                 DocumentUri = documentUri;
                 FormattedContent = document.RawContent;
             }
             catch (Exception e)
             {
-                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw e; // let ServerCommand handle it
             }
             finally
             {

@@ -141,7 +141,7 @@
     <Compile Include="Controls\DocumentPanel.xaml.cs">
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DocumentPanelViewModel.cs" />
+    <Compile Include="ViewModels\DocumentViewModel.cs" />
     <Compile Include="DropDownButtonBehavior.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Messaging\Message.cs" />
@@ -190,6 +190,7 @@
     </Compile>
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
     <Compile Include="ViewModels\Messages\SearchAbortedMessage.cs" />
+    <Compile Include="ViewModels\Messages\ViewDocumentMessage.cs" />
     <Compile Include="ViewModels\SearchResultsViewModel.cs" />
     <Compile Include="Commands\ServerCommand.cs" />
     <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
