@@ -1,13 +1,9 @@
 ﻿using ArcGIS.Desktop.Framework.Controls;
-using System.Net;
 using System.Security;
 using System.Windows;
 
-namespace MarkLogic.Esri.ArcGISPro.AddIn
+namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
 {
-    /// <summary>
-    /// Interaction logic for CredentialsWindow.xaml
-    /// </summary>
     public partial class CredentialsWindow : ProWindow
     {
         public CredentialsWindow()
