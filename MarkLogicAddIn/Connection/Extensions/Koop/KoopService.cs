@@ -26,14 +26,19 @@ namespace MarkLogic.Extensions.Koop
                     try
                     {
                         var json = (JObject)JsonConvert.DeserializeObject(responseContent);
-                        return json.Value<JObject>("models").PropertyValues().Select(m => new ServiceModel(
-                            m.Value<string>("id"),
-                            m.Value<string>("name"),
-                            m.Value<string>("description"),
-                            m.Value<JArray>("valueNames").Values<string>().ToArray(),
-                            m.Value<string>("docTransform"),
-                            m.Value<JArray>("constraints").Values<JObject>().Select(o => new ServiceModelConstraint(o.Value<string>("name"), o.Value<string>("description")))
-                        ));
+                        return json.Value<JObject>("models").PropertyValues().Select(m => {
+                            var geoConstraints = new HashSet<string>(
+                                m.SelectTokens("layers[*].geoConstraint")
+                                    .Select(t => t.Value<string>()));
+                            return new ServiceModel(
+                                m.Value<string>("id"),
+                                m.Value<string>("name"),
+                                m.Value<string>("description"),
+                                geoConstraints.ToArray(),
+                                m.SelectToken("search.docTransform", true).Value<string>(),
+                                m.SelectToken("search.constraints", true).Values<JObject>()
+                                    .Select(o => new ServiceModelConstraint(o.Value<string>("name"), o.Value<string>("description"))));
+                        });
                     }
                     catch(Exception e)
                     {
