@@ -112,6 +112,9 @@
     <Compile Include="Controls\PointSymbologyPanel.xaml.cs">
       <DependentUpon>PointSymbologyPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SaveSearchWindow.xaml.cs">
+      <DependentUpon>SaveSearchWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SearchOptionsPanel.xaml.cs">
       <DependentUpon>SearchOptionsPanel.xaml</DependentUpon>
     </Compile>
@@ -181,6 +184,8 @@
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
+    <Compile Include="ViewModels\SaveSearchConstraintViewModel.cs" />
+    <Compile Include="ViewModels\SaveSearchViewModel.cs" />
     <Compile Include="ViewModels\SearchHelpViewModel.cs" />
     <Compile Include="Controls\SearchHelpWindow.xaml.cs">
       <DependentUpon>SearchHelpWindow.xaml</DependentUpon>
@@ -238,6 +243,10 @@
     <Page Include="Controls\PointSymbologyPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\SaveSearchWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\SearchOptionsPanel.xaml">
       <SubType>Designer</SubType>
