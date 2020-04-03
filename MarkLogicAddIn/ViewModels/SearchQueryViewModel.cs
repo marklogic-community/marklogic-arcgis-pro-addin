@@ -79,6 +79,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public ObservableCollection<string> Suggestions { get; } = new ObservableCollection<string>();
 
         private SearchCommand _cmdSuggest;
-        public ICommand Suggest => _cmdSuggest ?? (_cmdSuggest = new SearchCommand(MessageBus, ReturnOptions.Suggest));
+        public ICommand Suggest => _cmdSuggest ?? (_cmdSuggest = new SearchCommand(MessageBus, ReturnOptions.Suggest) { RequeryOnExecute = false });
     }
 }

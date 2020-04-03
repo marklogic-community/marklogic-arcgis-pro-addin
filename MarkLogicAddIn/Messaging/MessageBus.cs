@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Messaging
@@ -39,11 +40,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Messaging
             Subscribe(typeof(T), messageHandler);
         }
 
-        public async Task Publish<T>(T message) where T : Message
+        public async Task Publish<T>(T message, [CallerMemberName] string callerMember = null) where T : Message
         {
             if (message == null) throw new ArgumentNullException("message");
-            if (_subscriberMap.TryGetValue(message.GetType(), out ArrayList subscribers))
+            if (_subscriberMap.TryGetValue(typeof(T), out ArrayList subscribers))
             {
+                Debug.WriteLine($"Message published by {callerMember}: {typeof(T).Name}");
                 foreach(var handler in subscribers)
                 {
                     var handlerType = handler.GetType().GetGenericTypeDefinition();

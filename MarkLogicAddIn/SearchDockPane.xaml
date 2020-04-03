@@ -75,7 +75,10 @@
                             <ComboBox IsEnabled="{Binding HasSelectedFeatureServer}" DockPanel.Dock="Right" ItemsSource="{Binding SearchServiceProfiles}" SelectedItem="{Binding SelectedSearchServiceProfile}" DisplayMemberPath="Name"/>
                         </DockPanel>
                         <DockPanel Margin="5,5,5,0" LastChildFill="True">
-                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" Width="24" Height="24" BorderThickness="0" Click="SaveButton_Click" IsEnabled="{Binding Path=HasResults, Mode=OneWay}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" MinWidth="24" MinHeight="24" Padding="0" ToolTip="Save current search to a feature layer">
+                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" Width="24" Height="24" BorderThickness="0" 
+                                    Command="{Binding ShowSaveSearch}"
+                                    Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" 
+                                    MinWidth="24" MinHeight="24" Padding="0" ToolTip="Save current search to a feature layer">
                                 <Image Source="Images/Save_16x.png" Width="16" Height="24">
                                     <Image.Style>
                                         <Style TargetType="Image">

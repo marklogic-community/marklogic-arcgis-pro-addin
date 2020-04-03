@@ -27,22 +27,40 @@ namespace MarkLogic.Extensions.Koop
                     {
                         var json = (JObject)JsonConvert.DeserializeObject(responseContent);
                         return json.Value<JObject>("models").PropertyValues().Select(m => {
+                            var modelId = m.Value<string>("id");
                             var geoConstraints = new HashSet<string>(
                                 m.SelectTokens("layers[*].geoConstraint")
                                     .Select(t => t.Value<string>()));
+
+                            // TODO: uri assumes standard Koop route
+                            var fsub = new UriBuilder(connection.Profile.Uri) { Path = $"marklogic/{modelId}/FeatureServer" };
+
                             return new ServiceModel(
-                                m.Value<string>("id"),
+                                fsub.Uri,
+                                modelId,
                                 m.Value<string>("name"),
                                 m.Value<string>("description"),
                                 geoConstraints.ToArray(),
                                 m.SelectToken("search.docTransform", true).Value<string>(),
                                 m.SelectToken("search.constraints", true).Values<JObject>()
-                                    .Select(o => new ServiceModelConstraint(o.Value<string>("name"), o.Value<string>("description"))));
+                                    .Select(o => new ServiceModelConstraint(
+                                        o.Value<string>("name"), 
+                                        o.Value<string>("description"))),
+                                m.Value<JArray>("layers").Values<JObject>().Select(o =>
+                                {
+                                    var geometryType = (GeometryType)Enum.Parse(typeof(GeometryType), o.Value<string>("geometryType"), true);
+                                    return new ServiceModelLayer(
+                                        o.Value<int>("id"), 
+                                        o.Value<string>("name"), 
+                                        o.Value<string>("description"),
+                                        geometryType,
+                                        o.Value<string>("geoConstraint"));
+                                }));
                         });
                     }
-                    catch(Exception e)
+                    catch(JsonException e)
                     {
-                        throw new InvalidOperationException("Failed to parse JSON for service models.", e);
+                        throw new InvalidOperationException("An error occurred while trying to parse response JSON.", e);
                     }
                 }
             }

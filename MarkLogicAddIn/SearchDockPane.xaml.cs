@@ -30,26 +30,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             InitializeComponent();
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            /*var viewModel = (SearchDockPaneViewModel)DataContext;
-
-            Debug.Assert(viewModel != null);
-            Debug.Assert(viewModel.HasSelectedServiceModel);
-
-            var saveSearchViewModel = new SaveSearchViewModel();
-            saveSearchViewModel.Connection = viewModel.Connection;
-            //saveSearchViewModel.ServiceName = viewModel.SelectedSearchServiceProfile.ServiceName; TODO: replace
-
-            SaveSearchWindow dlg = new SaveSearchWindow();
-            dlg.DataContext = saveSearchViewModel;
-            var dlgResult = dlg.ShowDialog();
-            dlg.Close();
-
-            if (dlgResult.HasValue && dlgResult.Value == true)
-                viewModel.SaveToNewLayerCommand.Execute(dlg.DataContext as ISaveSearchOptions);*/
-        }
-
         private async void ServiceModels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             /*var serviceModel = e.AddedItems.Count > 0 ? (ServiceModel)e.AddedItems[0] : null;

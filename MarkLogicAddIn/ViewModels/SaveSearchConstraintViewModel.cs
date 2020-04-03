@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
 {
@@ -10,16 +7,28 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
     {
         public const int AddNewLayerId = -1;
 
-        public SaveSearchConstraintViewModel(string constraintName)
+        private readonly IList<SaveSearchViewModel.Layer> _availableLayers;
+
+        public SaveSearchConstraintViewModel(string constraintName, IList<SaveSearchViewModel.Layer> availableLayers)
         {
             ConstraintName = constraintName;
+            _availableLayers = availableLayers;
         }
+
+        public bool Valid => TargetLayerId >= AddNewLayerId && !string.IsNullOrWhiteSpace(LayerName);
 
         private bool _includeInSave;
         public bool IncludeInSave
         {
             get { return _includeInSave; }
-            set { SetProperty(ref _includeInSave, value); }
+            set 
+            { 
+                if (SetProperty(ref _includeInSave, value) && !value)
+                {
+                    TargetLayerId = AddNewLayerId;
+                    LayerName = LayerDescription = "";
+                }
+            }
         }
 
         private string _constraintName;
@@ -33,7 +42,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public int TargetLayerId
         {
             get { return _targetLayerId; }
-            set { SetProperty(ref _targetLayerId, value); }
+            set
+            {
+                if (SetProperty(ref _targetLayerId, value)) {
+                    var layer = _targetLayerId == AddNewLayerId ? null : _availableLayers.Where(l => l.Id == value).FirstOrDefault();
+                    LayerName = layer?.Name;
+                    LayerDescription = layer?.Description;
+                }
+            }
         }
 
         private string _layerName;

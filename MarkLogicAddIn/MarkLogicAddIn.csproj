@@ -104,8 +104,11 @@
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
     <Compile Include="Commands\PageSearchCommand.cs" />
+    <Compile Include="Commands\ShowSaveSearchCommand.cs" />
     <Compile Include="Commands\ShowSearchHelpCommand.cs" />
+    <Compile Include="Connection\Client\Search\SaveSearchResults.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModelConstraint.cs" />
+    <Compile Include="Connection\Extensions\Koop\ServiceModelLayer.cs" />
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
@@ -152,10 +155,6 @@
     <Compile Include="Controls\ResultsPanel.xaml.cs">
       <DependentUpon>ResultsPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SaveSearchViewModel.cs" />
-    <Compile Include="SaveSearchWindow.xaml.cs">
-      <DependentUpon>SaveSearchWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Connection\Client\Search\Facet.cs" />
     <Compile Include="Connection\Client\Search\FacetValue.cs" />
     <Compile Include="Connection\Client\Search\SearchService.cs" />
@@ -184,6 +183,7 @@
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
+    <Compile Include="ViewModels\Messages\SearchSavedMessage.cs" />
     <Compile Include="ViewModels\SaveSearchConstraintViewModel.cs" />
     <Compile Include="ViewModels\SaveSearchViewModel.cs" />
     <Compile Include="ViewModels\SearchHelpViewModel.cs" />
@@ -257,10 +257,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ResultsPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SaveSearchWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

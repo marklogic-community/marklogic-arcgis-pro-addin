@@ -218,6 +218,56 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Feature
             }
         }
 
+        public async Task AddFeatureLayer(MapView mapView, Uri featureServer, string layerName, int layerId)
+        {
+            if (mapView == null) throw new ArgumentNullException("mapView");
+            if (featureServer == null) throw new ArgumentNullException("serviceUrl");
+            if (layerName == null) throw new ArgumentNullException("layerName");
+
+            var progressDlg = new ProgressDialog("Updating map...");
+            try
+            {
+                progressDlg.Show();
+
+                await QueuedTask.Run(() =>
+                {
+                    // check if the feature layer already exists (e.g. save search -> replace)
+                    var featureLayer = FindLayerByDataset<FeatureLayer>(mapView.Map, featureServer.AbsoluteUri, layerId.ToString());
+                    if (featureLayer == null)
+                    {
+                        // add the new feature layer 
+                        using (var geoDb = new Geodatabase(new ServiceConnectionProperties(featureServer)))
+                        {
+                            var featureClass = geoDb.OpenDataset<FeatureClass>(layerId.ToString());
+                            featureLayer = LayerFactory.Instance.CreateFeatureLayer(featureClass, mapView.Map);
+                        }
+                    }
+                    else
+                    {
+                        // force a refresh
+                        featureLayer.ClearDisplayCache();
+                        featureLayer.SetDefinitionQuery(featureLayer.DefinitionQuery);
+                    }
+
+                    // ensure the feature layer is visible
+                    if (!featureLayer.IsVisible)
+                        featureLayer.SetVisibility(true);
+
+                    // update layer name
+                    if (featureLayer.Name != layerName)
+                        featureLayer.SetName(layerName);
+                });
+            }
+            catch (Exception e)
+            {
+                e.HandleAsUserNotification();
+            }
+            finally
+            {
+                progressDlg.Hide();
+            }
+        }
+
         public async Task AddFeatureLayer(MapView mapView, string groupName, string serviceUrl, string layerName, string layerId)
         {
             if (mapView == null)

@@ -1,19 +1,23 @@
-﻿using MarkLogic.Esri.ArcGISPro.AddIn.Controls;
+﻿using MarkLogic.Client.Search;
+using MarkLogic.Esri.ArcGISPro.AddIn.Controls;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
-using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
 using System;
 using System.Windows.Input;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 {
-    public class ShowSearchHelpCommand : ICommand
+    public class ShowSaveSearchCommand : ICommand
     {
-        public ShowSearchHelpCommand(MessageBus messageBus)
+        public ShowSaveSearchCommand(MessageBus messageBus, Func<SearchResults> getSearchResults)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            GetSearchResults = getSearchResults ?? throw new ArgumentNullException("getSearchResults");
         }
 
         protected MessageBus MessageBus { get; set; }
+
+        protected Func<SearchResults> GetSearchResults { get; set; }
 
         public event EventHandler CanExecuteChanged
         {
@@ -23,9 +27,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 
         public bool CanExecute(object parameter)
         {
-            var msg = new GetServerSettingsMessage();
-            MessageBus.Publish(msg).Wait();
-            return msg.ServiceModel != null;
+            return GetSearchResults() != null;
         }
 
         public void Execute(object parameter)
@@ -33,9 +35,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
             if (!CanExecute(parameter))
                 return;
 
-            var viewModel = new SearchHelpViewModel(MessageBus);
-            var window = new SearchHelpWindow() { DataContext = viewModel };
-            window.Show();
+            var viewModel = new SaveSearchViewModel(MessageBus, GetSearchResults());
+            var window = new SaveSearchWindow() { DataContext = viewModel };
+            window.ShowDialog();
         }
     }
 }

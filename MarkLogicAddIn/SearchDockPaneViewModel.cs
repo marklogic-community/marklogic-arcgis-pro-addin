@@ -4,6 +4,7 @@ using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using MarkLogic.Client.Search;
 using MarkLogic.Client.Search.Query;
 using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
 using MarkLogic.Esri.ArcGISPro.AddIn.Map;
@@ -29,11 +30,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
     {
         public const string DockPaneId = "MarkLogic_Esri_ArcGISPro_AddIn_SearchDockPane";
 
+        private SearchResults _lastSearchResults;
+
         protected SearchDockPaneViewModel()
         {
             var module = AddInModule.Instance;
             MessageBus = module.MessageBus;
             MessageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
+            MessageBus.Subscribe<EndSearchMessage>(m => _lastSearchResults = m.Results.ReturnOptions.HasFlag(ReturnOptions.Values) ? m.Results : null);
 
             ConnectionViewModel = module.GetMainViewModel<SearchConnectionViewModel>();
             QueryViewModel = module.GetMainViewModel<SearchQueryViewModel>();
@@ -55,6 +59,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 if (e.MapView == MapView.Active && ConnectionViewModel.HasSelectedServiceModel)
                     QueryViewModel.Search.Execute(null);
             });
+
+            ResolveSearchModelState();
         }
 
         private MessageBus MessageBus { get; set; }
@@ -73,6 +79,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public ShowSearchHelpCommand _cmdShowSearchHelp;
         public ICommand ShowSearchHelp => _cmdShowSearchHelp ?? (_cmdShowSearchHelp = new ShowSearchHelpCommand(MessageBus));
+
+        public ShowSaveSearchCommand _cmdShowSaveSearch;
+        public ICommand ShowSaveSearch => _cmdShowSaveSearch ?? (_cmdShowSaveSearch = new ShowSaveSearchCommand(MessageBus, () => _lastSearchResults));
 
         public SearchModelState State { get; private set; }
 

@@ -1,13 +1,16 @@
 ﻿<controls:ProWindow x:Class="MarkLogic.Esri.ArcGISPro.AddIn.Controls.SaveSearchWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Controls"
-        xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
-        xmlns:controls="clr-namespace:ArcGIS.Desktop.Framework.Controls;assembly=ArcGIS.Desktop.Framework"
-        mc:Ignorable="d"
-        Title="Save Search as Features" Height="400" Width="500">
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:local="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Controls"
+                    xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
+                    xmlns:controls="clr-namespace:ArcGIS.Desktop.Framework.Controls;assembly=ArcGIS.Desktop.Framework"
+                    mc:Ignorable="d"
+                    Title="Save Search as Features" Height="400" Width="500"
+                    WindowStartupLocation="CenterOwner" ShowInTaskbar="False" 
+                    SizeToContent="WidthAndHeight" 
+                    ShowCloseButton="False" ShowMinButton="False" ShowMaxRestoreButton="False">  
     <DockPanel LastChildFill="True" Margin="20" Name="ctlSaveSearch">
         <DockPanel.Resources>
             <ResourceDictionary>
@@ -34,7 +37,6 @@
                     Width="70" Margin="5"
                     Click="CancelButton_Click">Cancel</Button>
             <Button DockPanel.Dock="Right" Style="{DynamicResource Esri_Button}" 
-                    IsEnabled="{Binding Path=CanSave}" 
                     IsDefault="True" 
                     Width="70" Margin="5" 
                     Click="SaveButton_Click"
@@ -43,44 +45,49 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" 
                       HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding ConstraintsToSave}">
-                <DataTemplate>
-                    <Grid DockPanel.Dock="Top" Margin="20,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,10"/>
-                        <CheckBox Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" Margin="0,0,10,10"
-                                  IsChecked="{Binding IncludeInSave}">
-                            <TextBlock Text="{Binding ConstraintName}" Style="{DynamicResource Esri_TextBlockH3}"/>
-                        </CheckBox>
-                        <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" 
-                                   Text="Save to layer" Margin="30,0,10,10"/>
-                        <ComboBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Center"
-                                  Margin="0,0,0,10"
-                                  ItemsSource="{Binding DataContext.AvailableLayers, ElementName=ctlSaveSearch}"
-                                  SelectedValue="{Binding TargetLayerId, Mode=TwoWay}"
-                                  SelectedValuePath="Id"
-                                  DisplayMemberPath="Name"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" 
-                                   Text="Layer name" Margin="30,0,10,10"/>
-                        <TextBox Grid.Row="2" Grid.Column="2" VerticalAlignment="Center"
-                                 Margin="0,0,0,10"
-                                 Text="{Binding LayerName}"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" 
-                                   Text="Layer description" Margin="30,0,10,10"/>
-                        <TextBox Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"
-                                 Margin="0,0,0,10"
-                                 Text="{Binding LayerDescription}"/>
-                    </Grid>
-                </DataTemplate>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid DockPanel.Dock="Top" Margin="20,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,10"/>
+                            <CheckBox Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" Margin="0,0,10,10"
+                                      IsChecked="{Binding IncludeInSave}">
+                                <TextBlock Text="{Binding ConstraintName}" Style="{DynamicResource Esri_TextBlockH3}"/>
+                            </CheckBox>
+                            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" 
+                                       Text="Save to layer" Margin="30,0,10,10"/>
+                            <ComboBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Center"
+                                      Margin="0,0,0,10"
+                                      IsEnabled="{Binding IncludeInSave}"
+                                      ItemsSource="{Binding DataContext.AvailableLayers, ElementName=ctlSaveSearch}"
+                                      SelectedValue="{Binding TargetLayerId, Mode=TwoWay}"
+                                      SelectedValuePath="Id"
+                                      DisplayMemberPath="Name"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" 
+                                       Text="Layer name" Margin="30,0,10,10"/>
+                            <TextBox Grid.Row="2" Grid.Column="2" VerticalAlignment="Center"
+                                     Margin="0,0,0,10"
+                                     IsEnabled="{Binding IncludeInSave}"
+                                     Text="{Binding LayerName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" 
+                                       Text="Layer description" Margin="30,0,10,10"/>
+                            <TextBox Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"
+                                     Margin="0,0,0,10"
+                                     IsEnabled="{Binding IncludeInSave}"
+                                     Text="{Binding LayerDescription}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
     </DockPanel>

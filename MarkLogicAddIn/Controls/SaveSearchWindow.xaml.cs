@@ -33,8 +33,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Controls
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            var button = sender as Button;
-            button.Command?.Execute(button.CommandParameter);
         }
     }
 }

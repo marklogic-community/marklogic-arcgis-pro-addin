@@ -9,7 +9,7 @@ namespace MarkLogic.Client.Search
 {
     public class SearchResults
     {
-        private JObject _response;
+        private readonly JObject _response;
         private IDictionary<string, Facet> _facets;
         private List<SearchResult> _results;
         private List<string> _suggestions;

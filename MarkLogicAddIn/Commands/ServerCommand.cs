@@ -9,16 +9,19 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 {
     public class ServerCommand : ICommand
     {
-        public ServerCommand(Func<object, Task> execute, Func<object, bool> canExecute = null, Action<Exception> error = null)
+        public ServerCommand(Func<object, Task> execute, Func<object, bool> canExecute = null, Action<Exception> error = null, bool requeryOnExecute = true)
         {
             ExecuteCallback = execute ?? throw new ArgumentNullException("execute");
             CanExecuteCallback = canExecute;
             ErrorCallback = error;
+            RequeryOnExecute = requeryOnExecute;
         }
 
         protected ServerCommand()
         {
         }
+
+        public bool RequeryOnExecute { get; set; }
 
         protected Func<object, Task> ExecuteCallback { get; set; }
 
@@ -64,6 +67,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
                     ErrorCallback?.Invoke(e);
                 }
             }
+
+            if (RequeryOnExecute)
+                CommandManager.InvalidateRequerySuggested(); // for possible state changes in commands, view models, etc.
         }
 
         public delegate bool ResolveCredentialsDelegate(AuthorizationRequiredException e);
