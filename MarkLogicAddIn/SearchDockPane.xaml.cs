@@ -1,6 +1,5 @@
 ﻿using ArcGIS.Desktop.Framework.Controls;
 using ArcGIS.Desktop.Mapping;
-using MarkLogic.Esri.ArcGISPro.AddIn.Feature;
 using MarkLogic.Extensions.Koop;
 using System;
 using System.Collections.Generic;

@@ -79,6 +79,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 UpdatePerfOverlay(_perfClear, watch.Elapsed, true);
 #endif
             });
+            MessageBus.Subscribe<SearchSavedMessage>(m => Clear());
         }
 
         private MessageBus MessageBus { get; set; }

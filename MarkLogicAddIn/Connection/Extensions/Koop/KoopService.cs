@@ -1,5 +1,4 @@
 ﻿using MarkLogic.Client.Search;
-using MarkLogic.Esri.ArcGISPro.AddIn.Feature;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;

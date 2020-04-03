@@ -35,7 +35,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
             if (!CanExecute(parameter))
                 return;
 
-            var viewModel = new SaveSearchViewModel(MessageBus, GetSearchResults());
+            var viewModel = new SaveSearchViewModel(MessageBus, GetSearchResults(), false);
             var window = new SaveSearchWindow() { DataContext = viewModel };
             window.ShowDialog();
         }

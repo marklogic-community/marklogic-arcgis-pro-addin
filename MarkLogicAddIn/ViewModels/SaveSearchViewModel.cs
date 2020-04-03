@@ -1,7 +1,6 @@
 ﻿using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
 using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
-using MarkLogic.Esri.ArcGISPro.AddIn.Feature;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using MarkLogic.Extensions.Koop;
@@ -85,14 +84,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             var conn = ConnectionService.Instance.Create(ConnectionProfile);
             var saveResults = await SearchService.Instance.SaveSearch(conn, ServiceModel.Id, query, targetLayers);
 
-            var tasks = new List<Task>();
+            /*var tasks = new List<Task>();
             foreach (var featureLayer in saveResults.FeatureLayers)
-                tasks.Add(FeatureLayerBuilder.Instance.AddFeatureLayer(
+                tasks.Add(MapFeatureManager.Instance.AddFeatureLayer(
                     MapView.Active,
                     saveResults.FeatureService,
                     ConstraintsToSave.Where(c => c.ConstraintName == featureLayer.GeoConstraint).Select(c => c.LayerName).FirstOrDefault(),
                     featureLayer.Id));
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks);*/
 
             await MessageBus.Publish(new SearchSavedMessage(saveResults));
                 
