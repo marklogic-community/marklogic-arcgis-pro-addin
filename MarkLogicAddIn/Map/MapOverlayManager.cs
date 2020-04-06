@@ -87,10 +87,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             {
                 var extent = await HitTest(m.Location);
                 if (extent != null)
-                {
                     m.Extent = extent;
-                    m.Resolved = true;
-                }
+                m.Resolved = true; // resolve even when nothing hits, i.e. deselect
             });
         }
 

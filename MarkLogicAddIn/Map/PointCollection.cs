@@ -81,11 +81,21 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 
         public bool TryGetValueExtent(MapPoint point, out GeospatialBox extent, out Envelope elementHitbox)
         {
-            foreach(var elem in _elements)
+            // TODO: is there a better way to wrap around a point?
+            var xOffset = 0.000004;
+            var yOffset = 0.000008;
+
+            foreach (var elem in _elements)
             {
                 if (GeometryEngine.Instance.Contains(elem.Hitbox, point))
                 {
-                    extent = new GeospatialBox() { West = 0, South = 0, East = 0, North = 0 };
+                    extent = new GeospatialBox() 
+                    { 
+                        West = elem.Location.X - xOffset, 
+                        South = elem.Location.Y - yOffset, 
+                        East = elem.Location.X + xOffset, 
+                        North = elem.Location.Y + yOffset 
+                    };
                     elementHitbox = elem.Hitbox;
                     return true;
                 }
