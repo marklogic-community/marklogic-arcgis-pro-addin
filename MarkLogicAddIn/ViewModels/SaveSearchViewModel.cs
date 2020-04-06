@@ -81,8 +81,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             if (!EnableAddNew)
                 Debug.Assert(ConstraintsToSave.All(c => c.TargetLayerId != SaveSearchConstraintViewModel.AddNewLayerId));
 
-            var conn = ConnectionService.Instance.Create(ConnectionProfile);
-            var saveResults = await SearchService.Instance.SaveSearch(conn, ServiceModel.Id, query, targetLayers);
+            //var conn = ConnectionService.Instance.Create(ConnectionProfile);
+            //var saveResults = await SearchService.Instance.SaveSearch(conn, ServiceModel.Id, query, targetLayers);
 
             /*var tasks = new List<Task>();
             foreach (var featureLayer in saveResults.FeatureLayers)
@@ -92,6 +92,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                     ConstraintsToSave.Where(c => c.ConstraintName == featureLayer.GeoConstraint).Select(c => c.LayerName).FirstOrDefault(),
                     featureLayer.Id));
             await Task.WhenAll(tasks);*/
+            SaveSearchResults saveResults = null;
 
             await MessageBus.Publish(new SearchSavedMessage(saveResults));
                 

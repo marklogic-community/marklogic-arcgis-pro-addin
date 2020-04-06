@@ -29,7 +29,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             InitializeComponent();
         }
 
-        private async void ServiceModels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ServiceModels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             /*var serviceModel = e.AddedItems.Count > 0 ? (ServiceModel)e.AddedItems[0] : null;
             if (serviceModel == null)

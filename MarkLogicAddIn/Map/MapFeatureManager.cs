@@ -1,5 +1,7 @@
 ﻿using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
+using ArcGIS.Desktop.Catalog;
+using ArcGIS.Desktop.Core;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
@@ -20,6 +22,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             MessageBus.Subscribe<SearchSavedMessage>(async m =>
             {
                 // add feature layers here
+                await QueuedTask.Run(() =>
+                {
+                    var project = Project.Current;
+                    var conns = project.GetItems<ServerConnectionProjectItem>();
+                });
             });
         }
 

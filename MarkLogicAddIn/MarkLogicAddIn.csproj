@@ -123,8 +123,7 @@
     </Compile>
     <Compile Include="Converters\EmptyArrayToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumToVisibilityConverter.cs" />
-    <Compile Include="Map\PointClusterCollection.cs" />
-    <Compile Include="Map\PointCollection.cs" />
+    <Compile Include="Map\Drawing.cs" />
     <Compile Include="Map\IPointSymbology.cs" />
     <Compile Include="Commands\SearchCommand.cs" />
     <Compile Include="Connection\Client\Document\Document.cs" />
@@ -148,6 +147,11 @@
     <Compile Include="Controls\DocumentPanel.xaml.cs">
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Map\OverlayCollection.cs" />
+    <Compile Include="Map\PointClusterCollection.cs" />
+    <Compile Include="Map\PointCollection.cs" />
+    <Compile Include="Map\SelectorOverlay.cs" />
+    <Compile Include="Map\Tool\InspectMapTool.cs" />
     <Compile Include="ViewModels\DocumentViewModel.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Messaging\Message.cs" />
@@ -184,6 +188,7 @@
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
     <Compile Include="ViewModels\Messages\SearchSavedMessage.cs" />
+    <Compile Include="ViewModels\Messages\SelectMapLocationMessage.cs" />
     <Compile Include="ViewModels\SaveSearchConstraintViewModel.cs" />
     <Compile Include="ViewModels\SaveSearchViewModel.cs" />
     <Compile Include="ViewModels\SearchHelpViewModel.cs" />

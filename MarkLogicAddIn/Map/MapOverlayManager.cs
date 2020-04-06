@@ -1,5 +1,7 @@
-﻿using ArcGIS.Desktop.Mapping;
+﻿using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
+using MarkLogic.Client.Search.Query;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using System;
@@ -30,7 +32,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             public PointClusterCollection PointClusters { get; set; }
         }
 
-        private Dictionary<string, OverlayGroup> _overlayGroupMap = new Dictionary<string, OverlayGroup>();
+        private readonly Dictionary<string, OverlayGroup> _overlayGroupMap = new Dictionary<string, OverlayGroup>();
+        private readonly SelectorOverlay _selector = new SelectorOverlay();
 #if DEBUG
         private MapViewOverlayControl _mapCtlPerf;
         private TextBlock _ctlPerf;
@@ -80,6 +83,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 #endif
             });
             MessageBus.Subscribe<SearchSavedMessage>(m => Clear());
+            MessageBus.Subscribe<SelectMapLocationMessage>(async m =>
+            {
+                var extent = await HitTest(m.Location);
+                if (extent != null)
+                {
+                    m.Extent = extent;
+                    m.Resolved = true;
+                }
+            });
         }
 
         private MessageBus MessageBus { get; set; }
@@ -92,6 +104,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 group.PointClusters.Clear();
             }
             _overlayGroupMap.Clear();
+            _selector.Clear();
         }
 
         public async Task<bool> ApplyResults(SearchResults results)
@@ -103,8 +116,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             var tasks = new List<Task<bool>>();
             foreach(var valueName in results.ValueNames)
             {
-                var msg = new GetSymbologyMessage(valueName);
-                await MessageBus.Publish(msg);
+                var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
                 Debug.Assert(msg.Resolved && msg.Symbology != null);
 
                 var group = new OverlayGroup(valueName);
@@ -122,8 +134,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             if (mapView == null) 
                 return false;
 
-            var msg = new GetSymbologyMessage(valueName);
-            await MessageBus.Publish(msg);
+            var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
             Debug.Assert(msg.Resolved && msg.Symbology != null);
             
             var hasGroup = _overlayGroupMap.TryGetValue(valueName, out OverlayGroup group);
@@ -137,6 +148,30 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             return retVals.All(r => r == true);
         }
 
+        public async Task<GeospatialBox> HitTest(MapPoint location)
+        {
+            var mapView = MapView.Active;
+            if (mapView == null)
+                return null;
+
+            _selector.Clear();
+            foreach (var group in _overlayGroupMap.Values.Reverse()) // start from the last geo constraint added
+            {
+                GeospatialBox extent;
+                Envelope elementHitbox;
+                var hit = group.PointClusters.TryGetValueExtent(location, out extent, out elementHitbox);
+                if (!hit)
+                    hit = group.Points.TryGetValueExtent(location, out extent, out elementHitbox);
+
+                if (hit)
+                {
+                    await _selector.Select(mapView, elementHitbox);
+                    return extent;
+                }
+            }
+
+            return null; // no hits
+        }
 #if DEBUG
         private void UpdatePerfOverlay(TimeSpan perfClear, TimeSpan perfApply, bool isRedraw)
         {
@@ -154,26 +189,5 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             _ctlPerf.Text = $"Overlays cleared: {perfClear.ToString("mm':'ss':'fff")}\n{(isRedraw ? "Overlay redrawn" : "New overlays added")}: {perfApply.ToString("mm':'ss':'fff")}";
         }
 #endif
-
-        /*public async Task<bool> SelectPoint(double _long, double _lat)
-        {
-            var mapView = MapView.Active;
-            if (mapView == null) return false;
-            
-            await QueuedTask.Run(() => 
-            {
-                if (_focusSymbol == null)
-                    _focusSymbol = SymbolFactory.Instance.ConstructPointSymbol(ColorFactory.Instance.BlueRGB, 12.0, SimpleMarkerStyle.Circle).MakeSymbolReference();
-
-                if (_focusElement != null)
-                    _focusElement.Dispose();
-
-                _focusPoint = MapPointBuilder.CreateMapPoint(_long, _lat, SpatialReferences.WGS84);
-                _focusElement = this.MapView.AddOverlay(_focusPoint, _focusSymbol);
-                return _focusPoint;
-            });
-
-            return true;
-        }*/
     }
 }

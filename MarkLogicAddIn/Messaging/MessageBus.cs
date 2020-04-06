@@ -40,7 +40,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Messaging
             Subscribe(typeof(T), messageHandler);
         }
 
-        public async Task Publish<T>(T message, [CallerMemberName] string callerMember = null) where T : Message
+        public async Task<T> Publish<T>(T message, [CallerMemberName] string callerMember = null) where T : Message
         {
             if (message == null) throw new ArgumentNullException("message");
             if (_subscriberMap.TryGetValue(typeof(T), out ArrayList subscribers))
@@ -59,6 +59,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Messaging
                         break;
                 }
             }
+            return message;
         }
     }
 }

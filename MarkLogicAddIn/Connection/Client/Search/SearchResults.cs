@@ -108,6 +108,11 @@ namespace MarkLogic.Client.Search
 
         public IEnumerable<string> ValueNames => _response.Value<JObject>("values").Properties().Select(p => p.Name);
 
+        public bool HasValuePoints(string valueName)
+        {
+            return _response.SelectToken("$.values." + valueName + ".points") != null;
+        }
+
         public IEnumerable<ValuePoint> GetValuePoints(string valueName)
         {
             var points = _response.SelectToken("$.values." + valueName + ".points");
@@ -119,6 +124,11 @@ namespace MarkLogic.Client.Search
                 Latitude = obj.Value<double>("lat"),
                 Longitude = obj.Value<double>("lon")
             });
+        }
+
+        public bool HasValuePointClusters(string valueName)
+        {
+            return _response.SelectToken("$.values." + valueName + ".pointClusters") != null;
         }
 
         public IEnumerable<ValuePointCluster> GetValuePointClusters(string valueName)

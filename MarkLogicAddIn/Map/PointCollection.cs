@@ -3,13 +3,14 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using MarkLogic.Client.Search;
+using MarkLogic.Client.Search.Query;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 {
-    public class PointCollection
+    public class PointCollection : OverlayCollection
     {
         private class Element
         {
@@ -18,17 +19,16 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             public MapPoint Location { get; set; }
 
             public IDisposable Overlay { get; set; }
+
+            public Envelope Hitbox { get; set; }
         }
 
         private List<Element> _elements = new List<Element>();
         private CIMSymbolReference _symbolRef;
 
-        public PointCollection(string valueName)
+        public PointCollection(string valueName) : base(valueName)
         {
-            ValueName = valueName ?? throw new ArgumentNullException("valueName");
         }
-
-        public string ValueName { get; private set; }
 
         public void Clear()
         {
@@ -55,7 +55,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 {
                     var location = MapPointBuilder.CreateMapPoint(point.Longitude, point.Latitude, spatialRef);
                     var overlay = mapView.AddOverlay(location, _symbolRef);
-                    _elements.Add(new Element() { Value = point, Location = location, Overlay = overlay });
+                    _elements.Add(new Element() { Value = point, Location = location, Overlay = overlay, Hitbox = CreateHitBox(mapView, location, symbology.Size / 2, spatialRef) });
                 }
             });
             return _elements.Count > 0;
@@ -73,9 +73,26 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 {
                     element.Overlay.Dispose();
                     element.Overlay = mapView.AddOverlay(element.Location, _symbolRef);
+                    element.Hitbox = CreateHitBox(mapView, element.Location, symbology.Size / 2, spatialRef);
                 }
             });
             return true;
+        }
+
+        public bool TryGetValueExtent(MapPoint point, out GeospatialBox extent, out Envelope elementHitbox)
+        {
+            foreach(var elem in _elements)
+            {
+                if (GeometryEngine.Instance.Contains(elem.Hitbox, point))
+                {
+                    extent = new GeospatialBox() { West = 0, South = 0, East = 0, North = 0 };
+                    elementHitbox = elem.Hitbox;
+                    return true;
+                }
+            }
+            extent = null;
+            elementHitbox = null;
+            return false;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 {
     public class SearchCommand : ServerCommand
     {
-        public SearchCommand(MessageBus messageBus, ReturnOptions returnOptions = SearchQuery.DefaultReturnOptions)
+        public SearchCommand(MessageBus messageBus, ReturnOptions returnOptions = SearchQuery.DefaultReturnOptions, bool broadcastSearch = true, Func<SearchQuery, Task> queryCallback = null, Func<SearchResults, Task> resultsCallback = null)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
             MessageBus.Subscribe<ServerSettingsChangedMessage>(m => CommandManager.InvalidateRequerySuggested());
@@ -18,11 +18,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
             CanExecuteCallback = InternalCanExecuteCallback;
             ErrorCallback = InternalErrorCallback;
             ReturnOptions = returnOptions;
+            BroadcastSearch = broadcastSearch;
+            QueryCallback = queryCallback;
+            ResultsCallback = resultsCallback;
         }
 
         protected virtual async void InternalErrorCallback(Exception e)
         {
-            await MessageBus.Publish(new SearchAbortedMessage());
+            if (BroadcastSearch)
+                await MessageBus.Publish(new SearchAbortedMessage());
         }
 
         protected virtual bool InternalCanExecuteCallback(object parameter)
@@ -36,6 +40,12 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 
         protected ReturnOptions ReturnOptions { get; set; }
 
+        protected bool BroadcastSearch { get; set; }
+
+        protected Func<SearchQuery, Task> QueryCallback { get; set; }
+
+        protected Func<SearchResults, Task> ResultsCallback { get; set; }
+
         protected virtual BuildSearchMessage OnBuildSearch() => new BuildSearchMessage(new SearchQuery() { ReturnOptions = ReturnOptions });
 
         protected virtual BeginSearchMessage OnBeginSearch() => new BeginSearchMessage(ReturnOptions);
@@ -44,8 +54,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
 
         private async Task ExecuteSearch(object parameter)
         {
-            var serverMsg = new GetServerSettingsMessage();
-            await MessageBus.Publish(serverMsg);
+            var serverMsg = await MessageBus.Publish(new GetServerSettingsMessage());
             Debug.Assert(serverMsg.Resolved && serverMsg.Profile != null && serverMsg.ServiceModel != null);
             var profile = serverMsg.Profile ?? throw new InvalidOperationException("Unable to resolve current connection profile.");
             var model = serverMsg.ServiceModel ?? throw new InvalidOperationException("Unable to resolve current service model.");
@@ -53,14 +62,18 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Commands
             // build query
             var buildMsg = OnBuildSearch();
             await MessageBus.Publish(buildMsg);
+            if (QueryCallback != null)
+                await QueryCallback(buildMsg.Query);
 
             // get results
             var conn = ConnectionService.Instance.Create(profile);
-            var beginSearchMsg = OnBeginSearch();
-            await MessageBus.Publish(beginSearchMsg);
+            if (BroadcastSearch)
+                await MessageBus.Publish(OnBeginSearch());
             var results = await SearchService.Instance.Search(conn, buildMsg.Query, model);
-            var endSearchMsg = OnEndSearch(results);
-            await MessageBus.Publish(endSearchMsg);
+            if (BroadcastSearch)
+                await MessageBus.Publish(OnEndSearch(results));
+            if (ResultsCallback != null)
+                await ResultsCallback(results);
         }
     }
 }
