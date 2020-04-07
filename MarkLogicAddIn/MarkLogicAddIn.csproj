@@ -109,6 +109,7 @@
     <Compile Include="Connection\Client\Search\SaveSearchResults.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModelConstraint.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModelLayer.cs" />
+    <Compile Include="Controls\DependencyProperties.cs" />
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
@@ -123,6 +124,7 @@
     </Compile>
     <Compile Include="Converters\EmptyArrayToVisibilityConverter.cs" />
     <Compile Include="Converters\EnumToVisibilityConverter.cs" />
+    <Compile Include="Converters\MatchesToInlinesConverter.cs" />
     <Compile Include="Map\Drawing.cs" />
     <Compile Include="Map\IPointSymbology.cs" />
     <Compile Include="Commands\SearchCommand.cs" />

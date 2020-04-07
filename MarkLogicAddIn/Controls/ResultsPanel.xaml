@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Controls"
              xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
              xmlns:converters="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Converters"
              mc:Ignorable="d" 
@@ -32,6 +33,7 @@
                 </Style.Triggers>
             </Style>
             <converters:EmptyArrayToVisibilityConverter x:Key="EmptyArrayToVisibility"/>
+            <converters:MatchesToInlinesConverter x:Key="MatchesToInlines"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -99,7 +101,7 @@
                                        ToolTip="{Binding Uri}"/>
                         </Button>
                         <TextBlock Margin="0,3,0,0" 
-                                   Text="{Binding MatchesFullText}" 
+                                   controls:DependencyProperties.Inlines="{Binding Matches, Converter={StaticResource MatchesToInlines}}"
                                    Style="{DynamicResource Esri_TextBlockRegular}" 
                                    TextWrapping="Wrap"/>
                     </StackPanel>
