@@ -19,18 +19,22 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             });
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
-                IsSearching = true;
                 if (m.ReturnOptions.HasFlag(ReturnOptions.Results) && !m.IsPaging)
+                {
                     StatusMessage = "Searching...";
+                    IsSearching = true;
+                }
                 if (m.ReturnOptions.HasFlag(ReturnOptions.Suggest))
                     Suggestions.Clear();
 
             });
             MessageBus.Subscribe<EndSearchMessage>(m =>
             {
-                IsSearching = false;
                 if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Results) && !m.IsPaging)
+                {
                     StatusMessage = $"Matched {m.Results.Total,1:n0} documents and {m.Results.TotalObjects,1:n0} distinct objects.";
+                    IsSearching = false;
+                }
                 if (m.Results.ReturnOptions.HasFlag(ReturnOptions.Suggest))
                 {
                     foreach (var suggestion in m.Results.QuerySuggestions)
