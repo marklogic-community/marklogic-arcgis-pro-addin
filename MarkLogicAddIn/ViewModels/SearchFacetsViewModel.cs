@@ -15,6 +15,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchFacetsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m =>
+            {
+                if (m.ServiceModel == null)
+                {
+                    SelectedFacets.Clear();
+                    Facets.Clear();
+                }
+            });
             MessageBus.Subscribe<BuildSearchMessage>(m => 
             {
                 SelectedFacets = Facets.SelectMany(f => f.Values).Where(v => v.Selected).ToList(); // save selected facets

@@ -14,6 +14,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public SearchResultsViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m =>
+            {
+                if (m.ServiceModel == null)
+                {
+                    Results.Clear();
+                    IsFirstPage = IsLastPage = false;
+                    CurrentPage = TotalPages = PrevStart = NextStart = 0;
+                }
+            });
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
                 if (m.ReturnOptions.HasFlag(ReturnOptions.Results))

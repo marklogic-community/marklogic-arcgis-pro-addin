@@ -47,6 +47,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
         public MapOverlayManager(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m =>
+            {
+                if (m.ServiceModel == null)
+                    Clear();
+            });
             MessageBus.Subscribe<BeginSearchMessage>(m =>
             {
                 if (m.ReturnOptions.HasFlag(ReturnOptions.Values))

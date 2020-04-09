@@ -13,6 +13,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         public SearchQueryViewModel(MessageBus messageBus)
         {
             MessageBus = messageBus ?? throw new ArgumentNullException("messageBus");
+            MessageBus.Subscribe<ServerSettingsChangedMessage>(m =>
+            {
+                if (m.ServiceModel == null)
+                {
+                    QueryText = "";
+                    StatusMessage = "";
+                }
+            });
             MessageBus.Subscribe<BuildSearchMessage>(m =>
             {
                 m.Query.QueryText = QueryText;

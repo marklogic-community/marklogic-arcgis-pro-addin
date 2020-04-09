@@ -1,4 +1,5 @@
-﻿using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
+﻿using ArcGIS.Desktop.Framework;
+using MarkLogic.Esri.ArcGISPro.AddIn.Commands;
 using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
 using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels.Messages;
 using MarkLogic.Extensions.Koop;
@@ -45,6 +46,14 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
         }
 
         public bool HasSelectedProfile => SelectedConnectionProfile != null;
+
+        private RelayCommand _cmdResetConnectionProfile;
+        public ICommand ResetConnectionProfile => _cmdResetConnectionProfile ?? (_cmdResetConnectionProfile = new RelayCommand(() => 
+        {
+            SelectedServiceModel = null;
+            SelectedConnectionProfile = null;
+            Connected = false;
+        }));
 
         public ObservableCollection<ServiceModel> ServiceModels { get; private set; }
 
