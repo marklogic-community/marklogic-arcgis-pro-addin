@@ -37,7 +37,15 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             var module = AddInModule.Instance;
             MessageBus = module.MessageBus;
             MessageBus.Subscribe<BuildSearchMessage>(async m => m.Query.Viewport = await GetCurrentViewport());
-            MessageBus.Subscribe<EndSearchMessage>(m => _lastSearchResults = m.Results.ReturnOptions.HasFlag(ReturnOptions.Values) ? m.Results : null);
+            MessageBus.Subscribe<EndSearchMessage>(m => 
+            {
+                _lastSearchResults = m.Results.ReturnOptions.HasFlag(ReturnOptions.Values) ? m.Results : null;
+                if (_lastSearchResults != null)
+                {
+                    var pane = FrameworkApplication.DockPaneManager.Find(SearchResultsDockPaneViewModel.DockPaneId);
+                    pane?.Activate();
+                }
+            });
 
             ConnectionViewModel = module.GetMainViewModel<SearchConnectionViewModel>();
             QueryViewModel = module.GetMainViewModel<SearchQueryViewModel>();
@@ -56,7 +64,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             ActiveMapViewChangedEvent.Subscribe(e => ResolveSearchModelState());
             MapViewCameraChangedEvent.Subscribe(e =>
             {
-                if (e.MapView == MapView.Active && ConnectionViewModel.HasSelectedServiceModel)
+                if (e.MapView == MapView.Active && ConnectionViewModel.HasSelectedServiceModel && !QueryViewModel.IsSearching)
                     QueryViewModel.Search.Execute(null);
             });
 

@@ -31,7 +31,6 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
                         viewModel.Values.ToList().ForEach(fv => fv.Selected = SelectedFacets.Any(sf => sf.Equals(fv)));
                         Facets.Add(viewModel);
                     }
-                    SelectedFacets = null; // clear previously saved
                 }
             });
             Facets = new ObservableCollection<FacetViewModel>();

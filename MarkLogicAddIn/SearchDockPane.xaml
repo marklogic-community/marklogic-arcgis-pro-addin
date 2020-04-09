@@ -47,15 +47,34 @@
             <StackPanel>
                 <Expander Header="Search" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
                     <StackPanel>
-                        <DockPanel DataContext="{Binding Path=ConnectionViewModel}" Margin="5,0,5,0" LastChildFill="True">
-                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Command="{Binding ClearServiceModels}" Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="Disconnect from MarkLogic">
+                        <Grid Margin="5,5,5,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Button Grid.Column="0" Grid.Row="0" Margin="5,0,2,0" 
+                                    MinWidth="24" MinHeight="24"
+                                    Width="24" Height="24" 
+                                    BorderThickness="0" 
+                                    Background="Transparent" 
+                                    Padding="0" 
+                                    Style="{DynamicResource Esri_ButtonBorderless}" 
+                                    ToolTip="Change server"
+                                    Command="{Binding ConnectionViewModel.ClearServiceModels}">
                                 <Image Source="Images/Disconnect_16x.png" Width="16" Height="24" />
                             </Button>
-                            <ComboBox DockPanel.Dock="Right" SelectionChanged="ServiceModels_SelectionChanged" ItemsSource="{Binding ServiceModels}" SelectedItem="{Binding SelectedServiceModel}" DisplayMemberPath="Name"/>
-                        </DockPanel>
-                        <DockPanel Margin="5,5,5,0" LastChildFill="True">
-                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" MinWidth="24" Width="24" Height="24" BorderThickness="0" Background="Transparent" 
-                                    Style="{DynamicResource Esri_ButtonBorderless}" Padding="0" ToolTip="View search information"
+                            <Button Grid.Column="1" Grid.Row="0" Margin="5,0,2,0" 
+                                    MinWidth="24" MinHeight="24"
+                                    Width="24" Height="24" 
+                                    BorderThickness="0" 
+                                    Background="Transparent" 
+                                    Padding="0" 
+                                    Style="{DynamicResource Esri_ButtonBorderless}" 
+                                    ToolTip="View search information"
                                     Command="{Binding ShowSearchHelp}">
                                 <Image Source="Images/StatusInformation_16x.png" Width="16" Height="24">
                                     <Image.Style>
@@ -72,13 +91,15 @@
                                     </Image.Style>
                                 </Image>
                             </Button>
-                            <ComboBox IsEnabled="{Binding HasSelectedFeatureServer}" DockPanel.Dock="Right" ItemsSource="{Binding SearchServiceProfiles}" SelectedItem="{Binding SelectedSearchServiceProfile}" DisplayMemberPath="Name"/>
-                        </DockPanel>
-                        <DockPanel Margin="5,5,5,0" LastChildFill="True">
-                            <Button DockPanel.Dock="Right" Margin="5,0,2,0" Width="24" Height="24" BorderThickness="0" 
-                                    Command="{Binding ShowSaveSearch}"
-                                    Background="Transparent" Style="{DynamicResource Esri_ButtonBorderless}" 
-                                    MinWidth="24" MinHeight="24" Padding="0" ToolTip="Save current search to a feature layer">
+                            <Button Grid.Column="2" Grid.Row="0" Margin="5,0,2,0" 
+                                    MinWidth="24" MinHeight="24" 
+                                    Width="24" Height="24" 
+                                    BorderThickness="0" 
+                                    Background="Transparent" 
+                                    Padding="0" 
+                                    Style="{DynamicResource Esri_ButtonBorderless}"                                     
+                                    ToolTip="Save current search to a feature layer"
+                                    Command="{Binding ShowSaveSearch}">
                                 <Image Source="Images/Save_16x.png" Width="16" Height="24">
                                     <Image.Style>
                                         <Style TargetType="Image">
@@ -94,13 +115,23 @@
                                     </Image.Style>
                                 </Image>
                             </Button>
+                        </Grid>
+                        <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                            <ComboBox DockPanel.Dock="Right" 
+                                      SelectionChanged="ServiceModels_SelectionChanged" 
+                                      ItemsSource="{Binding ConnectionViewModel.ServiceModels}" 
+                                      SelectedItem="{Binding ConnectionViewModel.SelectedServiceModel}" 
+                                      DisplayMemberPath="Name"/>
+                        </DockPanel>
+                        <DockPanel Margin="5,5,5,0" LastChildFill="True">
                             <controls:SearchTextBox IsEnabled="{Binding ConnectionViewModel.HasSelectedServiceModel}" 
                                                     Text="{Binding QueryViewModel.QueryText, UpdateSourceTrigger=PropertyChanged}" 
                                                     Name="inputSearch" 
                                                     InfoText="Search for..." 
                                                     SearchMode="Manual" 
                                                     ShowHistory="True" 
-                                                    SuggestionSource="{Binding QueryViewModel.Suggestions}" >
+                                                    SuggestionSource="{Binding QueryViewModel.Suggestions}"
+                                                    IsPopupEnabled="True">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Search">
                                         <i:InvokeCommandAction Command="{Binding QueryViewModel.Search}"/>
@@ -111,12 +142,14 @@
                                 </i:Interaction.Triggers>
                                 <controls:SearchTextBox.SuggestionItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock x:Name="DataItem" Text="{Binding}"/>
+                                        <TextBlock x:Name="DataItem" Text="{Binding .}"/>
                                     </DataTemplate>
                                 </controls:SearchTextBox.SuggestionItemTemplate>
                             </controls:SearchTextBox>
                         </DockPanel>
-                        <TextBlock Margin="5,2,5,0" TextWrapping="Wrap" Text="{Binding QueryViewModel.StatusMessage, Mode=OneWay}" Style="{DynamicResource Esri_TextBlockRegular}"/>
+                        <TextBlock Margin="5,2,5,0" TextWrapping="Wrap" 
+                                   Text="{Binding QueryViewModel.StatusMessage, Mode=OneWay}" 
+                                   Style="{DynamicResource Esri_TextBlockRegular}"/>
                     </StackPanel>
                 </Expander>
                 <Expander Header="Search Options" Margin="0" IsExpanded="False" Style="{DynamicResource Esri_ExpanderBorderless}">

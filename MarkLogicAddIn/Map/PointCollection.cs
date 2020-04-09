@@ -6,6 +6,7 @@ using MarkLogic.Client.Search;
 using MarkLogic.Client.Search.Query;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
@@ -44,38 +45,51 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             _symbolRef = pointSymbol.MakeSymbolReference();
         }
 
-        public async Task<bool> ApplyResults(MapView mapView, SearchResults results, IPointSymbology symbology)
+        public async Task<bool> ApplyResults(MapView mapView, SearchResults results, IPointSymbology symbology, CancellationToken ctsToken)
         {
             Clear();
+
+            if (ctsToken.IsCancellationRequested)
+                return false;
+
             await QueuedTask.Run(() =>
             {
                 InitSymbology(symbology);
                 var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
                 foreach (var point in results.GetValuePoints(ValueName))
                 {
+                    if (ctsToken.IsCancellationRequested)
+                        return;
+
                     var location = MapPointBuilder.CreateMapPoint(point.Longitude, point.Latitude, spatialRef);
                     var overlay = mapView.AddOverlay(location, _symbolRef);
                     _elements.Add(new Element() { Value = point, Location = location, Overlay = overlay, Hitbox = CreateHitBox(mapView, location, symbology.Size / 2, spatialRef) });
                 }
             });
+
             return _elements.Count > 0;
         }
 
-        public async Task<bool> Redraw(MapView mapView, IPointSymbology symbology)
+        public async Task<bool> Redraw(MapView mapView, IPointSymbology symbology, CancellationToken ctsToken)
         {
             if (_elements.Count <= 0)
                 return false;
+
             await QueuedTask.Run(() =>
             {
                 InitSymbology(symbology);
                 var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
                 foreach (var element in _elements)
                 {
+                    if (ctsToken.IsCancellationRequested)
+                        return;
+
                     element.Overlay.Dispose();
                     element.Overlay = mapView.AddOverlay(element.Location, _symbolRef);
                     element.Hitbox = CreateHitBox(mapView, element.Location, symbology.Size / 2, spatialRef);
                 }
             });
+
             return true;
         }
 

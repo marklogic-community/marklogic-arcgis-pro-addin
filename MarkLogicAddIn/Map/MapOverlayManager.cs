@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 #if DEBUG
@@ -33,6 +34,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
         }
 
         private readonly Dictionary<string, OverlayGroup> _overlayGroupMap = new Dictionary<string, OverlayGroup>();
+        private readonly object _overlayGroupMapLock = new object();
+        private CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly object _ctsLock = new object();
         private readonly SelectorOverlay _selector = new SelectorOverlay();
 #if DEBUG
         private MapViewOverlayControl _mapCtlPerf;
@@ -94,56 +98,127 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
 
         private MessageBus MessageBus { get; set; }
 
+        private void CancelRender()
+        {
+            lock (_ctsLock)
+            {
+                _cts?.Cancel();
+            }
+        }
+
+        private CancellationToken GetCancelRenderToken()
+        {
+            lock(_ctsLock)
+            {
+                _cts = new CancellationTokenSource();
+                return _cts.Token;
+            }
+        }
+
         public void Clear()
         {
-            foreach(var group in _overlayGroupMap.Values)
-            {
-                group.Points.Clear();
-                group.PointClusters.Clear();
+            Debug.WriteLine("MapOverlayManager: Clear");
+            CancelRender();
+            Monitor.Enter(_overlayGroupMapLock);
+            try
+            { 
+                foreach (var group in _overlayGroupMap.Values)
+                {
+                    group.Points.Clear();
+                    group.PointClusters.Clear();
+                }
+                _overlayGroupMap.Clear();
+                _selector.Clear();
             }
-            _overlayGroupMap.Clear();
-            _selector.Clear();
+            finally
+            {
+                Monitor.Exit(_overlayGroupMapLock);
+            }
         }
 
         public async Task<bool> ApplyResults(SearchResults results)
-        {
+        { 
+            Debug.WriteLine("MapOverlayManager: ApplyResults");
+
             var mapView = MapView.Active;
             if (mapView == null)
                 return false;
 
-            var tasks = new List<Task<bool>>();
-            foreach(var valueName in results.ValueNames)
+            var ctsToken = GetCancelRenderToken();
+            Monitor.Enter(_overlayGroupMapLock);
+            try
             {
-                var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
-                Debug.Assert(msg.Resolved && msg.Symbology != null);
+                var tasks = new List<Task<bool>>();
+                foreach (var valueName in results.ValueNames)
+                {
+                    if (ctsToken.IsCancellationRequested)
+                        return false;
 
-                var group = new OverlayGroup(valueName);
-                tasks.Add(group.Points.ApplyResults(mapView, results, msg.Symbology));
-                tasks.Add(group.PointClusters.ApplyResults(mapView, results, msg.Symbology));
-                _overlayGroupMap.Add(valueName, group);
+                    var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
+                    Debug.Assert(msg.Resolved && msg.Symbology != null);
+
+                    if (ctsToken.IsCancellationRequested)
+                        return false;
+
+                    var group = new OverlayGroup(valueName);
+                    tasks.Add(group.Points.ApplyResults(mapView, results, msg.Symbology, ctsToken));
+                    tasks.Add(group.PointClusters.ApplyResults(mapView, results, msg.Symbology, ctsToken));
+                    _overlayGroupMap.Add(valueName, group);
+                }
+                var retVals = await Task.WhenAll(tasks);
+                return retVals.All(r => r == true);
             }
-            var retVals = await Task.WhenAll(tasks);
-            return retVals.All(r => r == true);
+            finally
+            {
+                Monitor.Exit(_overlayGroupMapLock);
+                lock (_ctsLock)
+                {
+                    _cts.Dispose();
+                    _cts = null;
+                }
+            }
         }
 
         public async Task<bool> Redraw(string valueName)
         {
+            Debug.WriteLine("MapOverlayManager: Redraw");
+
             var mapView = MapView.Active;
             if (mapView == null) 
                 return false;
 
-            var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
-            Debug.Assert(msg.Resolved && msg.Symbology != null);
-            
-            var hasGroup = _overlayGroupMap.TryGetValue(valueName, out OverlayGroup group);
-            Debug.Assert(hasGroup);
-            if (!hasGroup)
-                return false;
+            var ctsToken = GetCancelRenderToken();
+            Monitor.Enter(_overlayGroupMapLock);
+            try
+            {
+                var msg = await MessageBus.Publish(new GetSymbologyMessage(valueName));
+                Debug.Assert(msg.Resolved && msg.Symbology != null);
 
-            var pointsTask = group.Points.Redraw(mapView, msg.Symbology);
-            var pointClustersTask = group.PointClusters.Redraw(mapView, msg.Symbology);
-            var retVals = await Task.WhenAll(pointsTask, pointClustersTask);
-            return retVals.All(r => r == true);
+                if (ctsToken.IsCancellationRequested)
+                    return false;
+
+                var hasGroup = _overlayGroupMap.TryGetValue(valueName, out OverlayGroup group);
+                Debug.Assert(hasGroup);
+                if (!hasGroup)
+                    return false;
+
+                if (ctsToken.IsCancellationRequested)
+                    return false;
+
+                var pointsTask = group.Points.Redraw(mapView, msg.Symbology, ctsToken);
+                var pointClustersTask = group.PointClusters.Redraw(mapView, msg.Symbology, ctsToken);
+                var retVals = await Task.WhenAll(pointsTask, pointClustersTask);
+                return retVals.All(r => r == true);
+            }
+            finally
+            {
+                Monitor.Exit(_overlayGroupMapLock);
+                lock (_ctsLock)
+                {
+                    _cts.Dispose();
+                    _cts = null;
+                }
+            }
         }
 
         public async Task<GeospatialBox> HitTest(MapPoint location)

@@ -6,6 +6,7 @@ using MarkLogic.Client.Search;
 using MarkLogic.Client.Search.Query;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
@@ -75,15 +76,22 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             return new Tuple<IDisposable, IDisposable, Envelope>(pointElem, textElem, hitbox);
         }
 
-        public async Task<bool> ApplyResults(MapView mapView, SearchResults results, IPointSymbology symbology)
+        public async Task<bool> ApplyResults(MapView mapView, SearchResults results, IPointSymbology symbology, CancellationToken ctsToken)
         {
             Clear();
+
+            if (ctsToken.IsCancellationRequested)
+                return false;
+
             await QueuedTask.Run(() =>
             {
                 InitSymbology(symbology);
                 var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
                 foreach (var pointCluster in results.GetValuePointClusters(ValueName))
                 {
+                    if (ctsToken.IsCancellationRequested)
+                        return;
+
                     var location = MapPointBuilder.CreateMapPoint(pointCluster.Longitude, pointCluster.Latitude, spatialRef);
                     var addItems = AddOverlay(mapView, location, pointCluster, spatialRef);
                     _elements.Add(new Element() { Location = location, Value = pointCluster, PointOverlay = addItems.Item1, TextOverlay = addItems.Item2, Hitbox = addItems.Item3 });
@@ -92,16 +100,20 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             return _elements.Count > 0;
         }
 
-        public async Task<bool> Redraw(MapView mapView, IPointSymbology symbology)
+        public async Task<bool> Redraw(MapView mapView, IPointSymbology symbology, CancellationToken ctsToken)
         {
             if (_elements.Count <= 0)
                 return false;
+
             await QueuedTask.Run(() =>
             {
                 InitSymbology(symbology);
                 var spatialRef = SpatialReferences.WGS84; // TODO: this should be coming from response
                 foreach (var element in _elements)
                 {
+                    if (ctsToken.IsCancellationRequested)
+                        return;
+
                     element.PointOverlay.Dispose();
                     element.TextOverlay.Dispose();
                     var addItems = AddOverlay(mapView, element.Location, element.Value, spatialRef);
@@ -110,6 +122,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                     element.Hitbox = addItems.Item3;
                 }
             });
+
             return true;
         }
 
