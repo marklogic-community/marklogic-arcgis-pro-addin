@@ -81,7 +81,7 @@
             </Button>
             <TextBlock TextAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource Esri_TextBlockRegular}">
                 <TextBlock.Text>
-                    <MultiBinding StringFormat="Page {0} of {1}">
+                    <MultiBinding StringFormat="Page {0:N0} of {1:N0}">
                         <Binding Path="CurrentPage"/>
                         <Binding Path="TotalPages"/>
                     </MultiBinding>

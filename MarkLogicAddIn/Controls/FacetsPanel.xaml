@@ -23,7 +23,7 @@
                             <DataTemplate>
                                 <Grid Margin="5,2">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition SharedSizeGroup="FacetValueLabels"/>
+                                        <ColumnDefinition/>
                                         <ColumnDefinition SharedSizeGroup="FacetValueCounts"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>

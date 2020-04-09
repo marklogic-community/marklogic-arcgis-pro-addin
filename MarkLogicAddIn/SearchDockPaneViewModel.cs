@@ -91,6 +91,11 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
         public ShowSaveSearchCommand _cmdShowSaveSearch;
         public ICommand ShowSaveSearch => _cmdShowSaveSearch ?? (_cmdShowSaveSearch = new ShowSaveSearchCommand(MessageBus, () => _lastSearchResults));
 
+        public RelayCommand _cmdInspectResults;
+        public ICommand InspectResults => _cmdInspectResults ?? (_cmdInspectResults = new RelayCommand(
+            () => FrameworkApplication.SetCurrentToolAsync("MarkLogic_Esri_ArcGISPro_AddIn_Map_Tool_InspectResultsMapTool"),
+            () => _lastSearchResults != null && MapView.Active != null));
+
         public SearchModelState State { get; private set; }
 
         private void ResolveSearchModelState()

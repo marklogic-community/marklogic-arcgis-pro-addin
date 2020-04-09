@@ -47,8 +47,9 @@
             <StackPanel>
                 <Expander Header="Search" Margin="0" IsExpanded="True" Style="{DynamicResource Esri_ExpanderBorderless}">
                     <StackPanel>
-                        <Grid Margin="5,5,5,0">
+                        <Grid Margin="5,5,5,5">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
@@ -114,6 +115,30 @@
                                         </Style>
                                     </Image.Style>
                                 </Image>
+                            </Button>
+                            <Button Grid.Column="3" Grid.Row="0" Margin="5,0,2,0"
+                                    MinWidth="24" MinHeight="24" 
+                                    BorderThickness="0" 
+                                    Background="Transparent" 
+                                    Padding="0" 
+                                    Style="{DynamicResource Esri_ButtonBorderless}"                                     
+                                    ToolTip="Get details on a particular search result"
+                                    Command="{Binding InspectResults}">
+                                <TextBlock>Inspect</TextBlock>
+                                <!--Image Source="Images/GenericButtonPurple16.png" Width="16" Height="24">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="True">
+                                                    <Setter Property="Opacity" Value="1.0"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image -->
                             </Button>
                         </Grid>
                         <DockPanel Margin="5,0,5,0" LastChildFill="True">

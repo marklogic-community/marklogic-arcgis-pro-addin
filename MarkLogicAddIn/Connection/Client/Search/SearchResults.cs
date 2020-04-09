@@ -14,13 +14,15 @@ namespace MarkLogic.Client.Search
         private List<SearchResult> _results;
         private List<string> _suggestions;
 
-        public SearchResults(string responseContent, ReturnOptions returnOptions)
+        public SearchResults(string responseContent, SearchQuery query)
         {
             RawContent = responseContent;
+            Query = (SearchQuery)query.Clone();
+            ReturnOptions = query.ReturnOptions;
+
             var json = JsonConvert.DeserializeObject(responseContent);
             Debug.Assert(json != null && json.GetType() == typeof(JObject));
             _response = (JObject)json;
-            ReturnOptions = returnOptions;
         }
 
         private static List<SearchResult> ReadResults(JObject response)
@@ -59,6 +61,8 @@ namespace MarkLogic.Client.Search
         }
 
         public string RawContent { get; private set; }
+
+        public SearchQuery Query { get; private set; }
 
         public ReturnOptions ReturnOptions { get; private set; }
 

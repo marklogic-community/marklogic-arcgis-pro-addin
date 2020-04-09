@@ -113,6 +113,9 @@
     <Compile Include="Controls\ColorPicker.xaml.cs">
       <DependentUpon>ColorPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\InspectResultsWindow.xaml.cs">
+      <DependentUpon>InspectResultsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\PointSymbologyPanel.xaml.cs">
       <DependentUpon>PointSymbologyPanel.xaml</DependentUpon>
     </Compile>
@@ -153,7 +156,7 @@
     <Compile Include="Map\PointClusterCollection.cs" />
     <Compile Include="Map\PointCollection.cs" />
     <Compile Include="Map\SelectorOverlay.cs" />
-    <Compile Include="Map\Tool\InspectMapTool.cs" />
+    <Compile Include="Map\Tool\InspectResultsMapTool.cs" />
     <Compile Include="ViewModels\DocumentViewModel.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Messaging\Message.cs" />
@@ -189,6 +192,7 @@
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
+    <Compile Include="ViewModels\InspectResultsViewModel.cs" />
     <Compile Include="ViewModels\Messages\SearchSavedMessage.cs" />
     <Compile Include="ViewModels\Messages\SelectMapLocationMessage.cs" />
     <Compile Include="ViewModels\SaveSearchConstraintViewModel.cs" />
@@ -246,6 +250,10 @@
     <Page Include="Controls\ColorPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\InspectResultsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PointSymbologyPanel.xaml">
       <SubType>Designer</SubType>

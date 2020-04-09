@@ -13,7 +13,7 @@ namespace MarkLogic.Client.Search
         Suggest = 8
     }
 
-    public class SearchQuery
+    public class SearchQuery : ICloneable
     {
         public const ReturnOptions DefaultReturnOptions = ReturnOptions.Results | ReturnOptions.Facets | ReturnOptions.Values;
 
@@ -28,6 +28,32 @@ namespace MarkLogic.Client.Search
             AggregateValues = true;
             ValuesLimit = 0;
             MaxLonDivs = MaxLatDivs = 100;
+        }
+
+        public object Clone()
+        {
+            var clone = new SearchQuery();
+            clone.Apply(this);
+            return clone;
+        }
+
+        public void Apply(SearchQuery otherQuery)
+        {
+            if (otherQuery == null) throw new ArgumentNullException(nameof(otherQuery));
+
+            ReturnOptions = otherQuery.ReturnOptions;
+            Start = otherQuery.Start;
+            PageLength = otherQuery.PageLength;
+            QueryText = otherQuery.QueryText;
+            AggregateValues = otherQuery.AggregateValues;
+            ValuesLimit = otherQuery.ValuesLimit;
+            Viewport = (GeospatialBox)otherQuery.Viewport.Clone();
+            MaxLonDivs = otherQuery.MaxLonDivs;
+            MaxLatDivs = otherQuery.MaxLatDivs;
+
+            _facets.Clear();
+            foreach(var pair in otherQuery._facets)
+                _facets.Add(pair.Key, new HashSet<string>(pair.Value));
         }
 
         public ReturnOptions ReturnOptions { get; set; }

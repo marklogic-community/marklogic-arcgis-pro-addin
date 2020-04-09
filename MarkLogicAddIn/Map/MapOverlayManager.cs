@@ -89,7 +89,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
             MessageBus.Subscribe<SearchSavedMessage>(m => Clear());
             MessageBus.Subscribe<SelectMapLocationMessage>(async m =>
             {
-                var extent = await HitTest(m.Location);
+                var extent = await Select(m.Location);
                 if (extent != null)
                     m.Extent = extent;
                 m.Resolved = true; // resolve even when nothing hits, i.e. deselect
@@ -173,7 +173,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 Monitor.Exit(_overlayGroupMapLock);
                 lock (_ctsLock)
                 {
-                    _cts.Dispose();
+                    _cts?.Dispose();
                     _cts = null;
                 }
             }
@@ -215,19 +215,22 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Map
                 Monitor.Exit(_overlayGroupMapLock);
                 lock (_ctsLock)
                 {
-                    _cts.Dispose();
+                    _cts?.Dispose();
                     _cts = null;
                 }
             }
         }
 
-        public async Task<GeospatialBox> HitTest(MapPoint location)
+        public async Task<GeospatialBox> Select(MapPoint location)
         {
             var mapView = MapView.Active;
             if (mapView == null)
                 return null;
 
             _selector.Clear();
+            if (location == null)
+                return null; // deselect selection
+
             foreach (var group in _overlayGroupMap.Values.Reverse()) // start from the last geo constraint added
             {
                 GeospatialBox extent;

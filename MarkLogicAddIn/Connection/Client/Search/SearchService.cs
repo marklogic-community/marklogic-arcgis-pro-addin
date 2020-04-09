@@ -86,7 +86,7 @@ namespace MarkLogic.Client.Search
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var results = new SearchResults(responseContent, query.ReturnOptions);
+                    var results = new SearchResults(responseContent, query);
                     return results;
                 }
             }
