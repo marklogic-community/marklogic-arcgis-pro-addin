@@ -92,27 +92,32 @@ namespace MarkLogic.Client.Search
             }
         }
 
-        public async Task<SaveSearchResults> SaveSearch(Connection connection, string serviceModelId, SearchQuery query, IDictionary<string, int?> targetLayers)
+        public async Task<SaveSearchResults> SaveSearch(Connection connection, SaveSearchRequest request)
         {
             var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/geoSearchService" };
 
             var inputParams = new JObject();
-            inputParams.Add("id", serviceModelId);
+            inputParams.Add("id", request.ServiceModel.Id);
 
             var paramsLayers = new JObject();
-            foreach (var pair in targetLayers)
+            foreach (var layer in request.Layers)
             {
-                if (pair.Value.HasValue)
-                    paramsLayers.Add(pair.Key, pair.Value);
+                var layerObj = new JObject();
+                if (layer.TargetLayerId == null)
+                    layerObj.Add("layerId", "new");
                 else
-                    paramsLayers.Add(pair.Key, "new");
+                    layerObj.Add("layerId", layer.TargetLayerId);
+                layerObj.Add("name", layer.Name);
+                layerObj.Add("description", layer.Description);
+
+                paramsLayers.Add(layer.SourceLayerId.ToString(), layerObj);
             }
             if (paramsLayers.Count > 0)
                 inputParams.Add("layers", paramsLayers);
             
             var input = new JObject();
             input.Add("params", inputParams);
-            input.Add("search", CreateSearchInput(query));
+            input.Add("search", CreateSearchInput(request.Query));
 
             var msg = new HttpRequestMessage(HttpMethod.Put, ub.Uri);
             msg.Content = new StringContent(input.ToString(), Encoding.UTF8, "application/json");
@@ -128,14 +133,18 @@ namespace MarkLogic.Client.Search
                         var json = (JObject)JsonConvert.DeserializeObject(responseContent);
                         var modelId = json.Value<string>("id");
 
-                        var layerMap = new Dictionary<string, int>();
+                        var layers = new List<SaveSearchResults.Layer>();
                         var layersObj = json.Value<JObject>("layers");
-                        layersObj.Properties().ToList().ForEach(p => layerMap.Add(p.Name, layersObj[p.Name].Value<int>()));
+                        layersObj.Properties().ToList().ForEach(p =>
+                        {
+                            var propObj = p.Value;
+                            layers.Add(new SaveSearchResults.Layer(propObj.Value<int>("layerId"), propObj.Value<string>("name"), p.Name));
+                        });
                         
                         // TODO: uri assumes standard Koop route
                         var fsub = new UriBuilder(connection.Profile.Uri) { Path = $"marklogic/{modelId}/FeatureServer" };
 
-                        return new SaveSearchResults(modelId, fsub.Uri, layerMap);
+                        return new SaveSearchResults(modelId, fsub.Uri, layers);
                     }
                     catch (JsonException e)
                     {

@@ -72,29 +72,30 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.ViewModels
             var query = new SearchQuery();
             await MessageBus.Publish(new BuildSearchMessage(query));
 
-            var targetLayers = new Dictionary<string, int?>();
+            var saveRequest = new SaveSearchRequest(ServiceModel, query);
             ConstraintsToSave.Where(c => c.IncludeInSave)
                 .ToList()
-                .ForEach(c => targetLayers.Add(c.ConstraintName, c.TargetLayerId == SaveSearchConstraintViewModel.AddNewLayerId ? (int?)null : c.TargetLayerId));
+                .ForEach(c =>
+                {
+                    int sourceLayerId = ServiceModel.Layers.Where(l => l.GeoConstraint == c.ConstraintName).Select(l => l.Id).FirstOrDefault();
+                    int? targetLayerId = c.TargetLayerId == SaveSearchConstraintViewModel.AddNewLayerId ? (int?)null : c.TargetLayerId;
+                    saveRequest.Layers.Add(new SaveSearchRequest.TargetLayer()
+                    {
+                        SourceLayerId = sourceLayerId,
+                        TargetLayerId = targetLayerId,
+                        Name = c.LayerName,
+                        Description = c.LayerDescription
+                    });
+                });
 
             // if add new is disabled, verify that we aren't calling for the creation of any new layers
             if (!EnableAddNew)
                 Debug.Assert(ConstraintsToSave.All(c => c.TargetLayerId != SaveSearchConstraintViewModel.AddNewLayerId));
 
-            //var conn = ConnectionService.Instance.Create(ConnectionProfile);
-            //var saveResults = await SearchService.Instance.SaveSearch(conn, ServiceModel.Id, query, targetLayers);
+            var conn = ConnectionService.Instance.Create(ConnectionProfile);
+            var saveResults = await SearchService.Instance.SaveSearch(conn, saveRequest);
 
-            /*var tasks = new List<Task>();
-            foreach (var featureLayer in saveResults.FeatureLayers)
-                tasks.Add(MapFeatureManager.Instance.AddFeatureLayer(
-                    MapView.Active,
-                    saveResults.FeatureService,
-                    ConstraintsToSave.Where(c => c.ConstraintName == featureLayer.GeoConstraint).Select(c => c.LayerName).FirstOrDefault(),
-                    featureLayer.Id));
-            await Task.WhenAll(tasks);*/
-            SaveSearchResults saveResults = null;
-
-            await MessageBus.Publish(new SearchSavedMessage(saveResults));
+            await MessageBus.Publish(new SearchSavedMessage(saveResults, ServiceModel));
                 
         }, o => CanSave));
 

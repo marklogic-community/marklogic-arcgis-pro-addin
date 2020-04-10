@@ -53,10 +53,10 @@
       </controls>
       <dockPanes>
         <dockPane id="MarkLogic_Esri_ArcGISPro_AddIn_SearchDockPane" caption="MarkLogic Search" className="SearchDockPaneViewModel" dock="group" dockWith="esri_core_projectDockPane">
-          <content className="SearchDockPaneView" />
+          <content className="SearchDockPane" />
         </dockPane>
         <dockPane id="MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane" caption="MarkLogic Search Results" className="SearchResultsDockPaneViewModel" dock="group" dockWith="esri_core_contentsDockPane">
-          <content className="SearchResultsDockPaneView" />
+          <content className="SearchResultsDockPane" />
         </dockPane>
       </dockPanes>
     </insertModule>

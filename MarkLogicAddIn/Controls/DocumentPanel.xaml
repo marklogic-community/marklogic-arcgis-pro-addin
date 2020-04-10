@@ -22,6 +22,6 @@
                    TextTrimming="CharacterEllipsis" 
                    ToolTip="{Binding DocumentUri}" 
                    Margin="3,3,3,5"/>
-        <WebBrowser local:SearchResultsDockPaneView.Html="{Binding FormattedContent}"/>
+        <WebBrowser local:SearchResultsDockPane.Html="{Binding FormattedContent}"/>
     </DockPanel>
 </UserControl>

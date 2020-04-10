@@ -52,7 +52,8 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
             FacetsViewModel = module.GetMainViewModel<SearchFacetsViewModel>();
             OptionsViewModel = module.GetMainViewModel<SearchOptionsViewModel>();
             SymbologyViewModel = module.GetMainViewModel<SymbologyOptionsViewModel>();
-            MapOverlay = new MapOverlayManager(module.MessageBus);
+            OverlayManager = new MapOverlayManager(MessageBus);
+            FeatureManager = new MapFeatureManager(MessageBus);
 
             ConnectionViewModel.ConnectionProfiles.CollectionChanged += (o, e) => ResolveSearchModelState();
             ConnectionViewModel.PropertyChanged += (o, e) => 
@@ -83,7 +84,9 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
 
         public SymbologyOptionsViewModel SymbologyViewModel { get; private set; }
 
-        public MapOverlayManager MapOverlay { get; private set; }
+        public MapOverlayManager OverlayManager { get; private set; }
+
+        public MapFeatureManager FeatureManager { get; private set; }
 
         public ShowSearchHelpCommand _cmdShowSearchHelp;
         public ICommand ShowSearchHelp => _cmdShowSearchHelp ?? (_cmdShowSearchHelp = new ShowSearchHelpCommand(MessageBus));

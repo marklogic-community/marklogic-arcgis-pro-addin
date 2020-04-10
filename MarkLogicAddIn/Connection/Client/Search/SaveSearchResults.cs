@@ -8,14 +8,17 @@ namespace MarkLogic.Client.Search
     {
         public class Layer
         {
-            public Layer(int id, string geoConstraint, Uri uri)
+            public Layer(int id, string name, string geoConstraint, Uri uri = null)
             {
                 Id = id;
+                Name = name;
                 GeoConstraint = geoConstraint;
                 Uri = uri;
             }
 
             public int Id { get; private set; }
+
+            public string Name { get; private set; }
 
             public string GeoConstraint { get; private set; }
 
@@ -24,17 +27,17 @@ namespace MarkLogic.Client.Search
 
         private readonly List<Layer> _layers;
 
-        public SaveSearchResults(string modelId, Uri featureServiceUri, IDictionary<string, int> layers)
+        public SaveSearchResults(string modelId, Uri featureServiceUri, IEnumerable<Layer> layers)
         {
             ServiceModelId = modelId;
             FeatureService = featureServiceUri;
             _layers = new List<Layer>();
-            layers.ToList().ForEach(l =>
+            foreach(var layer in layers)
             {
                 var ub = new UriBuilder(FeatureService);
-                ub.Path = ub.Path.TrimEnd('/') + '/' + l.Value.ToString();
-                _layers.Add(new Layer(l.Value, l.Key, ub.Uri));
-            });
+                ub.Path = ub.Path.TrimEnd('/') + '/' + layer.Id.ToString();
+                _layers.Add(new Layer(layer.Id, layer.Name, layer.GeoConstraint, ub.Uri));
+            };
         }
 
         public string ServiceModelId { get; private set; }

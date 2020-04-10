@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.SearchDockPaneView"
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.SearchDockPane"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:AddIn="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn"
              xmlns:Converters="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Converters"
@@ -143,7 +143,6 @@
                         </Grid>
                         <DockPanel Margin="5,0,5,0" LastChildFill="True">
                             <ComboBox DockPanel.Dock="Right" 
-                                      SelectionChanged="ServiceModels_SelectionChanged" 
                                       ItemsSource="{Binding ConnectionViewModel.ServiceModels}" 
                                       SelectedItem="{Binding ConnectionViewModel.SelectedServiceModel}" 
                                       DisplayMemberPath="Name"/>

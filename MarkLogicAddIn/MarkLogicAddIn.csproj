@@ -106,6 +106,7 @@
     <Compile Include="Commands\PageSearchCommand.cs" />
     <Compile Include="Commands\ShowSaveSearchCommand.cs" />
     <Compile Include="Commands\ShowSearchHelpCommand.cs" />
+    <Compile Include="Connection\Client\Search\SaveSearchRequest.cs" />
     <Compile Include="Connection\Client\Search\SaveSearchResults.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModelConstraint.cs" />
     <Compile Include="Connection\Extensions\Koop\ServiceModelLayer.cs" />
