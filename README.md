@@ -8,9 +8,9 @@ MarkLogic database straight from within the desktop application.  It is built us
 
 The add-in requires the following to operate:
 
-- A [Koop](https://github.com/koopjs/koop-provider-marklogic) feature server
+- A [Koop](https://github.com/koopjs/koop-provider-marklogic) server running the MarkLogic provider
 
-> The add-in relies Koop to serve features and act as a proxy to the MarkLogic database backend.  Please refer 
+> The add-in relies on Koop to serve features and act as a proxy to the MarkLogic database backend.  Please refer 
 > to the [Working with the ArcGIS Pro add-in](https://github.com/koopjs/koop-provider-marklogic/tree/master#working-with-the-arcgis-pro-add-in)
 > section for details on configuration and setup.
 
@@ -54,6 +54,12 @@ To setup a machine user to use the add-in:
 - ArcGIS Pro may indicate the need to restart for the changes to take effect.  If so, restart ArcGIS Pro.
 - Go back to `Add-In Manager` and verify that the **MarkLogic** tab group is present in the **Add-in** ribbon tab.
 
+### MarkLogic Configuration
+
+Koop relies on [Geo Data Services](https://github.com/marklogic-community/marklogic-geo-data-services) for accessing data stored in MarkLogic.  Additional configuration is required to enable 
+it to work with the add-in.  Refer to this [page](https://github.com/marklogic-community/marklogic-geo-data-services/wiki/Working-with-the-ArcGIS-Pro-add-in) for more details on how the add-in interacts with Geo Data Services 
+and the required changes to service descriptors.
+
 ### Server Registration
 
 You will need to register your Koop server before the add-in can connect, if you have not done so before.
@@ -69,7 +75,6 @@ You will need to register your Koop server before the add-in can connect, if you
 ### Connecting to a server
 
 You must use your MarkLogic user credentials when prompted to login.
-
 
 ## Development
 
