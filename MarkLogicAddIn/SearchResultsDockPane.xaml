@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.SearchResultsDockPaneView"
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.SearchResultsDockPane"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"   
-             xmlns:ui="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn"
+             xmlns:controls="clr-namespace:MarkLogic.Esri.ArcGISPro.AddIn.Controls"
              xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
@@ -23,14 +23,9 @@
                 Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType = DockPanel}, Path=DataContext.IsResultsTabSelected, Converter={StaticResource BooleanToVisibility}}"
                 VerticalScrollBarVisibility="Auto" 
                 HorizontalScrollBarVisibility="Disabled">
-                <ui:ResultsPanel 
-                    DataContext="{Binding ResultsViewModel}"
-                    Results="{Binding Results}" 
-                    SelectResult="{Binding SelectResultCommand}" 
-                    PagePrevResults="{Binding PagePrevResultsCommand}" 
-                    PageNextResults="{Binding PageNextResultsCommand}"/>
+                <controls:ResultsPanel DataContext="{Binding ResultsViewModel}"/>
             </ScrollViewer>
-            <ui:DocumentPanel 
+            <controls:DocumentPanel 
                 Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType = DockPanel}, Path=DataContext.IsDocumentTabSelected, Converter={StaticResource BooleanToVisibility}}"
                 DataContext="{Binding DocumentViewModel}"/>
         </Grid>

@@ -103,6 +103,35 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInModule.cs" />
+    <Compile Include="Commands\PageSearchCommand.cs" />
+    <Compile Include="Commands\ShowSaveSearchCommand.cs" />
+    <Compile Include="Commands\ShowSearchHelpCommand.cs" />
+    <Compile Include="Connection\Client\Search\SaveSearchRequest.cs" />
+    <Compile Include="Connection\Client\Search\SaveSearchResults.cs" />
+    <Compile Include="Connection\Extensions\Koop\ServiceModelConstraint.cs" />
+    <Compile Include="Connection\Extensions\Koop\ServiceModelLayer.cs" />
+    <Compile Include="Controls\DependencyProperties.cs" />
+    <Compile Include="Controls\ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\InspectResultsWindow.xaml.cs">
+      <DependentUpon>InspectResultsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PointSymbologyPanel.xaml.cs">
+      <DependentUpon>PointSymbologyPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SaveSearchWindow.xaml.cs">
+      <DependentUpon>SaveSearchWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SearchOptionsPanel.xaml.cs">
+      <DependentUpon>SearchOptionsPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\EmptyArrayToVisibilityConverter.cs" />
+    <Compile Include="Converters\EnumToVisibilityConverter.cs" />
+    <Compile Include="Converters\MatchesToInlinesConverter.cs" />
+    <Compile Include="Map\Drawing.cs" />
+    <Compile Include="Map\IPointSymbology.cs" />
+    <Compile Include="Commands\SearchCommand.cs" />
     <Compile Include="Connection\Client\Document\Document.cs" />
     <Compile Include="Connection\Client\Document\DocumentService.cs" />
     <Compile Include="Connection\Client\Search\Query\ConstraintQuery.cs" />
@@ -120,17 +149,21 @@
     <Compile Include="Connection\Extensions\Koop\KoopService.cs" />
     <Compile Include="Connection\Extensions\Koop\SearchServiceProfile.cs" />
     <Compile Include="Connection\Extensions\Koop\CreateFeatureLayerOptions.cs" />
-    <Compile Include="DocumentPanel.xaml.cs">
+    <Compile Include="Connection\Extensions\Koop\ServiceModel.cs" />
+    <Compile Include="Controls\DocumentPanel.xaml.cs">
       <DependentUpon>DocumentPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DocumentPanelViewModel.cs" />
-    <Compile Include="DropDownButtonBehavior.cs" />
-    <Compile Include="ResultsPanel.xaml.cs">
+    <Compile Include="Map\OverlayCollection.cs" />
+    <Compile Include="Map\PointClusterCollection.cs" />
+    <Compile Include="Map\PointCollection.cs" />
+    <Compile Include="Map\SelectorOverlay.cs" />
+    <Compile Include="Map\Tool\InspectResultsMapTool.cs" />
+    <Compile Include="ViewModels\DocumentViewModel.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Messaging\Message.cs" />
+    <Compile Include="Messaging\MessageBus.cs" />
+    <Compile Include="Controls\ResultsPanel.xaml.cs">
       <DependentUpon>ResultsPanel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="SaveSearchViewModel.cs" />
-    <Compile Include="SaveSearchWindow.xaml.cs">
-      <DependentUpon>SaveSearchWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Connection\Client\Search\Facet.cs" />
     <Compile Include="Connection\Client\Search\FacetValue.cs" />
@@ -141,15 +174,15 @@
     <Compile Include="Connection\Connection.cs" />
     <Compile Include="Connection\ConnectionProfile.cs" />
     <Compile Include="Connection\ConnectionService.cs" />
-    <Compile Include="CredentialsWindow.xaml.cs">
+    <Compile Include="Controls\CredentialsWindow.xaml.cs">
       <DependentUpon>CredentialsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Connection\ExtensionMethods.cs" />
-    <Compile Include="FacetsPanel.xaml.cs">
+    <Compile Include="Controls\FacetsPanel.xaml.cs">
       <DependentUpon>FacetsPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Feature\FeatureLayerBuilder.cs" />
-    <Compile Include="Map\MapPointOverlay.cs" />
+    <Compile Include="Map\MapFeatureManager.cs" />
+    <Compile Include="Map\MapOverlayManager.cs" />
     <Compile Include="SearchDockPane.xaml.cs">
       <DependentUpon>SearchDockPane.xaml</DependentUpon>
     </Compile>
@@ -160,15 +193,34 @@
       <DependentUpon>AppSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="SearchDockPaneViewModel.cs" />
-    <Compile Include="SearchInfoModel.cs" />
-    <Compile Include="SearchInfoWindow.xaml.cs">
-      <DependentUpon>SearchInfoWindow.xaml</DependentUpon>
+    <Compile Include="ViewModels\InspectResultsViewModel.cs" />
+    <Compile Include="ViewModels\Messages\SearchSavedMessage.cs" />
+    <Compile Include="ViewModels\Messages\SelectMapLocationMessage.cs" />
+    <Compile Include="ViewModels\SaveSearchConstraintViewModel.cs" />
+    <Compile Include="ViewModels\SaveSearchViewModel.cs" />
+    <Compile Include="ViewModels\SearchHelpViewModel.cs" />
+    <Compile Include="Controls\SearchHelpWindow.xaml.cs">
+      <DependentUpon>SearchHelpWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchResultsDockPane.xaml.cs">
       <DependentUpon>SearchResultsDockPane.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchResultsDockPaneViewModel.cs" />
-    <Compile Include="ResultsPanelViewModel.cs" />
+    <Compile Include="ViewModels\Messages\SearchAbortedMessage.cs" />
+    <Compile Include="ViewModels\Messages\ViewDocumentMessage.cs" />
+    <Compile Include="ViewModels\SearchResultsViewModel.cs" />
+    <Compile Include="Commands\ServerCommand.cs" />
+    <Compile Include="ViewModels\Messages\BeginSearchMessage.cs" />
+    <Compile Include="ViewModels\Messages\GetSymbologyMessage.cs" />
+    <Compile Include="ViewModels\Messages\RedrawMessage.cs" />
+    <Compile Include="ViewModels\PointSymbologyOptionsViewModel.cs" />
+    <Compile Include="ViewModels\FacetValueViewModel.cs" />
+    <Compile Include="ViewModels\FacetViewModel.cs" />
+    <Compile Include="ViewModels\Messages\BuildSearchMessage.cs" />
+    <Compile Include="ViewModels\Messages\ServerSettingsChangedMessage.cs" />
+    <Compile Include="ViewModels\Messages\EndSearchMessage.cs" />
+    <Compile Include="ViewModels\Messages\GetServerSettingsMessage.cs" />
+    <Compile Include="ViewModels\SearchConnectionViewModel.cs" />
     <Compile Include="Settings\ConnectionProfileList.cs" />
     <Compile Include="Settings\ServerDetailsWindow.xaml.cs">
       <DependentUpon>ServerDetailsWindow.xaml</DependentUpon>
@@ -177,7 +229,11 @@
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsViewModel.cs" />
-    <Compile Include="ViewModelBase.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Compile Include="ViewModels\SearchFacetsViewModel.cs" />
+    <Compile Include="ViewModels\SearchOptionsViewModel.cs" />
+    <Compile Include="ViewModels\SearchQueryViewModel.cs" />
+    <Compile Include="ViewModels\SymbologyOptionsViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\GenericButtonPurple16.png" />
@@ -192,23 +248,39 @@
     <AddInContent Include="DarkImages\GenericButtonPurple32.png" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DocumentPanel.xaml">
+    <Page Include="Controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\InspectResultsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ResultsPanel.xaml">
+    <Page Include="Controls\PointSymbologyPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\SaveSearchWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SaveSearchWindow.xaml">
+    <Page Include="Controls\SearchOptionsPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Controls\DocumentPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CredentialsWindow.xaml">
+    <Page Include="Controls\ResultsPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="FacetsPanel.xaml">
+    <Page Include="Controls\CredentialsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FacetsPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -216,7 +288,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SearchInfoWindow.xaml">
+    <Page Include="Controls\SearchHelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -280,6 +352,10 @@
   <ItemGroup>
     <AddInContent Include="Images\documents_16.png" />
     <AddInContent Include="Images\search_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Eye_18x.png" />
+    <AddInContent Include="Images\Eye_36x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--
