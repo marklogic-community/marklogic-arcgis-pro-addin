@@ -4,57 +4,74 @@ This project aims to provide Esri's [ArcGIS Pro](https://pro.arcgis.com) the cap
 MarkLogic database straight from within the desktop application.  It is built using the .NET platform and the 
 [ArcGIS Pro SDK](https://pro.arcgis.com/en/pro-app/sdk/).
 
+## Prerequisites
+
+The add-in requires the following to operate:
+
+- A [Koop](https://github.com/koopjs/koop-provider-marklogic) feature server
+
+> The add-in relies Koop to serve features and act as a proxy to the MarkLogic database backend.  Please refer 
+> to the [Working with the ArcGIS Pro add-in](https://github.com/koopjs/koop-provider-marklogic/tree/master#working-with-the-arcgis-pro-add-in)
+> section for details on configuration and setup.
+
 ## Installation
 
 The add-in can be deployed to a Windows machine, virtual or otherwise, with an existing installation of ArcGIS Pro. It can be install for a single user or as shared for all users (more common).
-
-### Shared
-
-The add-in can be deployed on a machine with multiple ArcGIS Pro users.  This process installs the add-in to a location that allows the add-in files to be publicly accessible by all of the machine's users.
-
-#### Part 1
-
-To setup the home location of the add-in for all machine users:
-
-Download the zip file for the [release](https://github.com/marklogic-community/marklogic-arcgis-pro-addin/releases) you want to install (this would have been done by you or someone else when a release was created).
-
-Open Windows Explorer and navigate to your system disk (usually C:) and the directory path `Users/Public/Public Documents`.
-
-Create directories that follow the path `ArcGIS/AddIns/arcgis-ml-addin`.
-
-Copy the archive to the destination machine and extract the files into `ArcGIS/AddIns/arcgis-ml-addin`.  
-
-> To update the add-in, simply download a new build, delete all files under `ArcGIS/AddIns/arcgis-ml-addin`, and extract the new files into the directory.
-
-#### Part 2
-
-To setup a machine user to use the add-in:
-
-Open ArcGIS Pro.  In the main screen, select `Project` in the upper-left hand corner of the window.
-
-Select `Add-In Manager` then open the `Options` tab.  Click on `Add Folder...` and select the `Users/Public/Public Documents/ArcGIS` folder.
-
-ArcGIS Pro may indicate the need to restart for the changes to take effect.  If so, restart ArcGIS Pro.
-
-Go back to `Add-In Manager` and verify that the `MarkLogic Search` add-in is present under Shared Add-Ins.
 
 ### Single User
 
 To deploy the add-in for a single user:
 
-Download the zip file for the [release](https://github.com/marklogic-community/marklogic-arcgis-pro-addin/releases) you want to install (this would have been done by you or someone else when a release was created).
+- Download the zip file for the [release](https://github.com/marklogic-community/marklogic-arcgis-pro-addin/releases) you want to install (this would have been done by you or someone else when a release was created).
+- Copy the archive to the destination machine and extract the files into a temporary directory.
+- Open Windows Explorer, navigate to the directory, and double-click on the file `MarkLogic.Esri.ArcGISPro.Addin.esriAddinX`.
+- The **Esri ArcGIS Add-In Installation Utility** prompt will appear to confirm the installation.  Click `Install Add-In`.  
+- Open ArcGIS Pro.  Confirm the add-in installation by looking for the **Add-in** ribbon tab containing the **MarkLogic** tab group.
 
-Copy the archive to the destination machine and extract the files into a temporary directory.
+> Note: This process will overwrite an older version of the add-in if it exists.
 
-Open Windows Explorer, navigate to the directory, and double-click on the `MarkLogic.Esri.ArcGISPro.Addin.esriAddinX`.
+### Shared Use
 
-The `Esri ArcGIS Add-In Installation Utility` prompt will appear to confirm the installation.  Click `Install Add-In`.  
+The add-in can be deployed on a machine for multiple ArcGIS Pro users.  This process installs the add-in to a location that makes the add-in files publicly accessible for all of the machine's users.
 
-Open ArcGIS Pro.  Confirm the add-in installation by looking for the `MarkLogic` ribbon tab and trying out a search.
+#### _Part 1_
 
-> This process will overwrite an older version of the add-in if it exists.
+To setup the home location of the add-in for all machine users:
 
-## Installation and Setup for Development
+- Download the zip file for the [release](https://github.com/marklogic-community/marklogic-arcgis-pro-addin/releases) you want to install (this would have been done by you or someone else when a release was created).
+- Open Windows Explorer and navigate to your system disk (usually C:) and the directory path `Users/Public/Public Documents`.
+- Create directories that follow the path `ArcGIS/AddIns/arcgis-ml-addin`.
+- Copy the archive to the destination machine and extract the files into `ArcGIS/AddIns/arcgis-ml-addin`.  
+
+> To update the add-in, simply download a new build, delete all files under `ArcGIS/AddIns/arcgis-ml-addin`, and extract the new files into the directory.
+
+#### _Part 2_
+
+To setup a machine user to use the add-in:
+
+- Open ArcGIS Pro.  In the main screen, select `Project` in the upper-left hand corner of the window.
+- Select `Add-In Manager` then open the `Options` tab.  Click on `Add Folder...` and select the `Users/Public/Public Documents/ArcGIS` folder.
+- ArcGIS Pro may indicate the need to restart for the changes to take effect.  If so, restart ArcGIS Pro.
+- Go back to `Add-In Manager` and verify that the **MarkLogic** tab group is present in the **Add-in** ribbon tab.
+
+### Server Registration
+
+You will need to register your Koop server before the add-in can connect, if you have not done so before.
+
+- Open ArcGIS Pro.  In the main screen, select `Project` in the upper-left hand corner of the window.
+- Select `Options` and then the `MarkLogic` tab.  
+- Under `Servers`, click on `Add...`.
+- Fill up `Name` with a description or name of your server, e.g. "My Koop Server".
+- Fill up `Host` and `Port` with your Koop server's host and port.  Check `Use SSL` if you have it enabled.
+- Press `OK` to add your server to the list, and `OK` again to save your settings.
+- Head back to your project and open the `MarkLogic Search` dock pane.  Your server should now be listed under `Connect to a server`.
+
+### Connecting to a server
+
+You must use your MarkLogic user credentials when prompted to login.
+
+
+## Development
 
 Follow these instructions if you want to develop new capabilities for the add-in.
 
@@ -62,10 +79,9 @@ Follow these instructions if you want to develop new capabilities for the add-in
 
 This solution has the following external dependencies:
 
-- [ArcGIS Pro SDK for .NET](https://github.com/Esri/arcgis-pro-sdk/wiki/ProGuide-Installation-and-Upgrade) (at least version 2.1.0.10257)
-- [Json.NET](https://www.newtonsoft.com/json) (at least version 10.0.3)
+- [ArcGIS Pro SDK for .NET](https://github.com/Esri/arcgis-pro-sdk/wiki/ProGuide-Installation-and-Upgrade)
+- [Json.NET](https://www.newtonsoft.com/json)
 - .NET Framework 4.6.1
-- The `marklogic-ui` server running on `http://esri-koop.demo.marklogic.com:8099`.
 
 Download and install [Visual Studio 2019](https://www.visualstudio.com/vs/community/) (Community or higher edition).
 Ensure that at least the **.NET desktop development** workload is selected when choosing your installation configuration.
@@ -100,7 +116,7 @@ Open the `Add-In` ribbon tab located at the top of the application and click on 
 
 Enter a query in the search box, for example `ISIS or ISIL`.
 
-The add-in will connect to the `esri-koop` MarkLogic server and will display the points from the search on the map.  If this 
+The add-in will connect to MarkLogic (proxied through Koop) and will display the points from the search on the map.  If this 
 is the first time the add-in will establish a connection, it will prompt the user for credentials.
 
 Type in a layer name under `Save to New Layer` and press `Save`.  This will save the recently search results into a feature layer.
