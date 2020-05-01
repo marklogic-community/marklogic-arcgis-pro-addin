@@ -29,13 +29,13 @@
         </Grid>
         <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoRegisteredServers}}">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-                <TextBlock Margin="15,1,15,0" Style="{DynamicResource Esri_TextBlockRegular}" Text="No registered MarkLogic servers found.  Go to your MarLogic Application Settings in Project Options to add a MarkLogic server." TextWrapping="Wrap"/>
+                <TextBlock Margin="15,1,15,0" Style="{DynamicResource Esri_TextBlockRegular}" Text="No registered servers found.  Go to your MarLogic Application Settings in Project Options to add a server." TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
         <Grid DockPanel.Dock="Top" Visibility="{Binding State, Converter={StaticResource EnumToVisibility}, ConverterParameter={x:Static AddIn:SearchModelState.NoConnection}}"
               IsEnabled="{Binding ConnectionViewModel.NotConnecting}">
             <StackPanel DataContext="{Binding Path=ConnectionViewModel}" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-                <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="Connect to a MarkLogic server"/>
+                <TextBlock Style="{DynamicResource Esri_TextBlockRegular}" Text="Connect to a server" Width="200" TextAlignment="Center"/>
                 <ComboBox Margin="5" ItemsSource="{Binding ConnectionProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedConnectionProfile}"></ComboBox>
                 <Button Margin="5" Width="80" Style="{DynamicResource Esri_Button}" Command="{Binding GetServiceModels}">Connect</Button>
             </StackPanel>
