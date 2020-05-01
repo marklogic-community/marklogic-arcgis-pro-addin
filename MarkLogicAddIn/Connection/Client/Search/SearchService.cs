@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using MarkLogic.Client.Search.Query;
+using MarkLogic.Esri.ArcGISPro.AddIn;
+using MarkLogic.Extensions.Koop;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,117 +24,103 @@ namespace MarkLogic.Client.Search
 
         public static SearchService Instance => _instance ?? (_instance = new SearchService());
 
-        private bool RequiresPayload(SearchQuery query)
+        private JObject CreateSearchInput(SearchQuery query)
         {
-            return query.AdditionalQueries.Count > 0;
+            var inputSearch = new JObject();
+            inputSearch.Add("qtext", query.QueryText);
+            inputSearch.Add("start", query.Start);
+            inputSearch.Add("pageLength", query.PageLength);
+            if (query.FacetNames.Count > 0)
+            {
+                var facets = new JObject();
+                foreach (var facetName in query.FacetNames)
+                    facets.Add(facetName, new JArray(query.GetFacetValues(facetName).Cast<object>().ToArray()));
+                inputSearch.Add("facets", facets);
+            }
+            if (query.Viewport != null)
+            {
+                var viewport = new JObject();
+                var box = new JObject();
+                box.Add("s", query.Viewport.South);
+                box.Add("w", query.Viewport.West);
+                box.Add("n", query.Viewport.North);
+                box.Add("e", query.Viewport.East);
+                viewport.Add("box", box);
+                viewport.Add("maxLonDivs", query.MaxLonDivs);
+                viewport.Add("maxLatDivs", query.MaxLatDivs);
+                inputSearch.Add("viewport", viewport);
+            }
+            if (query.AdditionalQueries.Count > 0)
+                inputSearch.Add("queries", new JArray(query.AdditionalQueries.Select(q => q.ToJson())));
+
+            return inputSearch;
         }
 
-        private void PreparePayload(HttpRequestMessage msg, SearchQuery query)
+        public async Task<SearchResults> Search(Connection connection, SearchQuery query, ServiceModel serviceModel)
         {
-            var addtlQueries = new JObject();
-            addtlQueries.Add("queries", new JArray(query.AdditionalQueries.Select(q => q.ToJson())));
-            var payload = new JObject();
-            payload.Add("query", addtlQueries);
-            msg.Content = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
-        }
-        
-        public async Task<SearchResults> Search(Connection connection, SearchQuery query, string searchOptions, long start = 1)
-        {
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/search" };
-            ub.AddQueryParam("options", searchOptions);
-            ub.AddQueryParam("pageLength", DefaultPageLength);
-            ub.AddQueryParam("start", start);
-            ub.AddQueryParam("q", query.FullQuery);
+            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/geoSearchService" };
 
-            var hasPayload = RequiresPayload(query);
-            var msg = new HttpRequestMessage(hasPayload ? HttpMethod.Post : HttpMethod.Get, ub.Uri);
-            if (hasPayload)
-                PreparePayload(msg, query);
+            var paramRequests = new List<string>();
+            if (query.ReturnOptions.HasFlag(ReturnOptions.Results)) paramRequests.Add("results");
+            if (query.ReturnOptions.HasFlag(ReturnOptions.Facets)) paramRequests.Add("facets");
+            if (query.ReturnOptions.HasFlag(ReturnOptions.Values)) paramRequests.Add("values");
+            if (query.ReturnOptions.HasFlag(ReturnOptions.Suggest)) paramRequests.Add("suggest");
 
+            var inputParams = new JObject();
+            inputParams.Add("id", serviceModel.Id);
+            inputParams.Add("request", new JArray(paramRequests));
+            inputParams.Add("aggregateValues", query.AggregateValues);
+            if (query.ValuesLimit > 0)
+                inputParams.Add("valuesLimit", query.ValuesLimit);
+
+            var input = new JObject();
+            input.Add("params", inputParams);
+            input.Add("search", CreateSearchInput(query));
+
+            var msg = new HttpRequestMessage(HttpMethod.Post, ub.Uri);
+            msg.Content = new StringContent(input.ToString(), Encoding.UTF8, "application/json");
+            
             using (msg)
             {
                 using (var response = await connection.SendAsync(msg))
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var results = new SearchResults(responseContent);
-
-                    // set selected facets
-                    if (results.Facets.Count > 0)
-                    {
-                        var allFacetValues = results.Facets.Values.SelectMany(f => f.Values).ToArray();
-
-                        // from external hint
-                        foreach (var facetValue in query.FacetValues)
-                        {
-                            var facetValueToSelect = allFacetValues.Where(v => v.QueryString == facetValue).FirstOrDefault();
-                            if (facetValueToSelect != null)
-                                facetValueToSelect.Selected = true;
-                        }
-
-                        // from qtext
-                        foreach (var facetValue in allFacetValues)
-                        {
-                            if (facetValue.ContainsQueryString(query.FullQuery))
-                                facetValue.Selected = true;
-                        }
-                    }
+                    var results = new SearchResults(responseContent, query);
                     return results;
                 }
             }
         }
 
-        public async Task<ValuesResults> Values(Connection connection, SearchQuery query, string searchOptions, string valuesName)
+        public async Task<SaveSearchResults> SaveSearch(Connection connection, SaveSearchRequest request)
         {
-            const uint limit = 1000000;
+            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/resources/geoSearchService" };
 
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = $"v1/values/{valuesName}" };
-            ub.AddQueryParam("options", searchOptions);
-            ub.AddQueryParam("limit", limit);
-            ub.AddQueryParam("q", query.FullQuery);
+            var inputParams = new JObject();
+            inputParams.Add("id", request.ServiceModel.Id);
 
-            var hasPayload = RequiresPayload(query);
-            var msg = new HttpRequestMessage(hasPayload ? HttpMethod.Post : HttpMethod.Get, ub.Uri);
-            if (hasPayload)
-                PreparePayload(msg, query);
-
-            using (msg)
+            var paramsLayers = new JObject();
+            foreach (var layer in request.Layers)
             {
-                using (var response = await connection.SendAsync(msg))
-                {
-                    response.EnsureSuccessStatusCode();
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    return new ValuesResults(responseContent);
-                }
+                var layerObj = new JObject();
+                if (layer.TargetLayerId == null)
+                    layerObj.Add("layerId", "new");
+                else
+                    layerObj.Add("layerId", layer.TargetLayerId);
+                layerObj.Add("name", layer.Name);
+                layerObj.Add("description", layer.Description);
+
+                paramsLayers.Add(layer.SourceLayerId.ToString(), layerObj);
             }
-        }
+            if (paramsLayers.Count > 0)
+                inputParams.Add("layers", paramsLayers);
+            
+            var input = new JObject();
+            input.Add("params", inputParams);
+            input.Add("search", CreateSearchInput(request.Query));
 
-        public async Task<SuggestionResults> Suggest(Connection connection, string partialQ, string searchOptions, uint limit = 10)
-        {
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = "v1/suggest" };
-            ub.AddQueryParam("options", searchOptions);
-            ub.AddQueryParam("partial-q", partialQ);
-            ub.AddQueryParam("limit", limit);
-
-            var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri);
-
-            using (msg)
-            {
-                using (var response = await connection.SendAsync(msg))
-                {
-                    response.EnsureSuccessStatusCode();
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    return new SuggestionResults(responseContent);
-                }
-            }
-        }
-
-        public async Task<SearchOptions> ConfigQuery(Connection connection, string searchOptions)
-        {
-            var ub = new UriBuilder(connection.Profile.Uri) { Path = $"v1/config/query/{searchOptions}" };
-            ub.AddQueryParam("format", "xml");
-
-            var msg = new HttpRequestMessage(HttpMethod.Get, ub.Uri);
+            var msg = new HttpRequestMessage(HttpMethod.Put, ub.Uri);
+            msg.Content = new StringContent(input.ToString(), Encoding.UTF8, "application/json");
 
             using (msg)
             {
@@ -138,7 +128,28 @@ namespace MarkLogic.Client.Search
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    return new SearchOptions(responseContent);
+                    try
+                    {
+                        var json = (JObject)JsonConvert.DeserializeObject(responseContent);
+                        var modelId = json.Value<string>("id");
+
+                        var layers = new List<SaveSearchResults.Layer>();
+                        var layersObj = json.Value<JObject>("layers");
+                        layersObj.Properties().ToList().ForEach(p =>
+                        {
+                            var propObj = p.Value;
+                            layers.Add(new SaveSearchResults.Layer(propObj.Value<int>("layerId"), propObj.Value<string>("name"), p.Name));
+                        });
+                        
+                        // TODO: uri assumes standard Koop route
+                        var fsub = new UriBuilder(connection.Profile.Uri) { Path = $"marklogic/{modelId}/FeatureServer" };
+
+                        return new SaveSearchResults(modelId, fsub.Uri, layers);
+                    }
+                    catch (JsonException e)
+                    {
+                        throw new InvalidOperationException("An error occurred while trying to parse response JSON.", e);
+                    }
                 }
             }
         }

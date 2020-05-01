@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarkLogic.Extensions.Koop
 {
+    [Obsolete]
     public class SearchServicesResults
     {
         private List<FeatureServerProfile> _featureServers;

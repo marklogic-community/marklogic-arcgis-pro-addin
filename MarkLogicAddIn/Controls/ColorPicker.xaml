@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.Controls.ColorPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="50">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <ComboBox Name="ctlColorPicker" 
+              IsTextSearchEnabled="True"
+              SelectionChanged="ColorPicker_SelectionChanged">
+        <ComboBox.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Fill="{Binding Brush}" Stroke="Black"
+                               Width="16" Height="16" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               ToolTip="{Binding Name}"/>
+                    <TextBlock Text="{Binding Name}"
+                               Margin="5,0,0,0"/>
+                </StackPanel>
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
+    </ComboBox>            
+</UserControl>

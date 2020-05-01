@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="MarkLogic.Esri.ArcGISPro.AddIn.Controls.SearchOptionsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="270">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical" Margin="5">
+                <DockPanel LastChildFill="True" Margin="0,0,0,7">
+                    <TextBox DockPanel.Dock="Right" MinWidth="60" 
+                             Name="ctlMaxValues"
+                             TextAlignment="Right"
+                             Visibility="{Binding ElementName=ctlValuesLimit, Path=IsChecked, Converter={StaticResource BooleanToVisibility}}"
+                             PreviewTextInput="MaxValues_PreviewTextInput"
+                             KeyDown="MaxValues_KeyDown"></TextBox>
+                    <CheckBox Name="ctlValuesLimit" 
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding LimitValues, Mode=TwoWay}"
+                              Checked="ValuesLimit_CheckedChanged"
+                              Unchecked="ValuesLimit_CheckedChanged">
+                        <TextBlock Style="{DynamicResource Esri_TextBlockRegular}">Limit geometry results</TextBlock>
+                    </CheckBox>
+                </DockPanel>
+                <CheckBox Name="ctlClusterResults" 
+                          VerticalAlignment="Center" Margin="0,0,0,7"
+                          IsChecked="{Binding ClusterResults, Mode=TwoWay}"
+                          Checked="ClusterResults_CheckChanged"
+                          Unchecked="ClusterResults_CheckChanged">
+                    <TextBlock Style="{DynamicResource Esri_TextBlockRegular}">Cluster results when possible</TextBlock>
+                </CheckBox>
+                <Grid DockPanel.Dock="Top" Margin="0,10,0,7"
+                      Visibility="{Binding ElementName=ctlClusterResults, Path=IsChecked, Converter={StaticResource BooleanToVisibility}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Slider Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10,0,10,5"
+                            Value="{Binding ClusterDivisions, Mode=TwoWay}"
+                            Name="ctlClusterDivisions"
+                            Minimum="1" Maximum="100" TickFrequency="1" LargeChange="10" 
+                            TickPlacement="Both" Ticks="10,20,30,40,50,60,70,80,90"
+                            ValueChanged="ClusterDivisions_ValueChanged"
+                            Thumb.DragStarted="ClusterDivisions_DragStarted"
+                            Thumb.DragCompleted="ClusterDivisions_DragCompleted"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="20,0,0,0"
+                               Style="{DynamicResource Esri_TextBlockRegular}">Less</TextBlock>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,20,0" TextAlignment="Right"
+                               Style="{DynamicResource Esri_TextBlockRegular}">More</TextBlock>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

@@ -29,7 +29,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Settings
         /// <remarks>This function is only called if the page has set its IsModified flag to true.</remarks>
         protected override Task CommitAsync()
         {
-            AddInModule.Current.SaveConnectionProfiles(ConnectionProfiles);
+            AddInModule.Instance.SaveConnectionProfiles(ConnectionProfiles);
             return Task.FromResult(0);
         }
 
@@ -39,7 +39,7 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn.Settings
         /// <returns>A task that represents the work queued to execute in the ThreadPool.</returns>
         protected override Task InitializeAsync()
         {
-            foreach (var connProfile in AddInModule.Current.RegisteredConnectionProfiles)
+            foreach (var connProfile in AddInModule.Instance.RegisteredConnectionProfiles)
             {
                 ConnectionProfiles.Add(connProfile.Clone() as ConnectionProfile);
             }

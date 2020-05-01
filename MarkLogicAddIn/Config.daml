@@ -27,6 +27,7 @@
           <!-- host controls within groups -->
           <button refID="MarkLogic_Esri_ArcGISPro_AddIn_SearchDockPane_ShowButton" size="large" />
           <button refID="MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane_ShowButton" size="large" />
+          <tool refID="MarkLogic_Esri_ArcGISPro_AddIn_Map_Tool_InspectResultsMapTool" size="large"/>
         </group>
       </groups>
       <controls>
@@ -37,13 +38,25 @@
         <button id="MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane_ShowButton" caption="Search Results" className="SearchResultsDockPane_ShowButton" loadOnClick="true" smallImage="Images\documents_16.png" largeImage="Images\documents_32.png">
           <tooltip heading="Search Results">Opens the MarkLogic Search Results Pane.<disabledText /></tooltip>
         </button>
+        <tool id="MarkLogic_Esri_ArcGISPro_AddIn_Map_Tool_InspectResultsMapTool" 
+              caption="Inspect" 
+              className="MarkLogic.Esri.ArcGISPro.AddIn.Map.Tool.InspectResultsMapTool"
+              loadOnClick="true" 
+              smallImage="Images\Eye_18x.png"
+              largeImage="Images\Eye_36x.png" 
+              condition="esri_mapping_mapPane">
+          <tooltip heading="Inspect">
+            Identify documents
+            <disabledText />
+          </tooltip>
+        </tool>
       </controls>
       <dockPanes>
         <dockPane id="MarkLogic_Esri_ArcGISPro_AddIn_SearchDockPane" caption="MarkLogic Search" className="SearchDockPaneViewModel" dock="group" dockWith="esri_core_projectDockPane">
-          <content className="SearchDockPaneView" />
+          <content className="SearchDockPane" />
         </dockPane>
         <dockPane id="MarkLogic_Esri_ArcGISPro_AddIn_SearchResultsDockPane" caption="MarkLogic Search Results" className="SearchResultsDockPaneViewModel" dock="group" dockWith="esri_core_contentsDockPane">
-          <content className="SearchResultsDockPaneView" />
+          <content className="SearchResultsDockPane" />
         </dockPane>
       </dockPanes>
     </insertModule>

@@ -1,40 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Windows.Input;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
-using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using MarkLogic.Esri.ArcGISPro.AddIn.Settings;
 using System.Windows;
+using MarkLogic.Esri.ArcGISPro.AddIn.Messaging;
+using MarkLogic.Esri.ArcGISPro.AddIn.ViewModels;
 
 namespace MarkLogic.Esri.ArcGISPro.AddIn
 {
     internal class AddInModule : Module
     {
-        private static AddInModule _this = null;
+        public const string ModuleId = "MarkLogic_Esri_ArcGISPro_AddIn_Module";
 
-        /// <summary>
-        /// Retrieve the singleton instance to this module here
-        /// </summary>
-        public static AddInModule Current
-        {
-            get
-            {
-                return _this ?? (_this = (AddInModule)FrameworkApplication.FindModule("MarkLogic_Esri_ArcGISPro_AddIn_Module"));
-            }
-        }
+        public static AddInModule Instance => (AddInModule)FrameworkApplication.FindModule(ModuleId);
 
         protected override bool Initialize()
         {
             LoadConnectionProfiles();
+            InitializeMainViewModels();
             return base.Initialize();
         }
 
-        private ObservableCollection<ConnectionProfile> _registeredConnectionProfiles = new ObservableCollection<ConnectionProfile>();
-        public ObservableCollection<ConnectionProfile> RegisteredConnectionProfiles => _registeredConnectionProfiles;
+        protected override bool CanUnload()
+        {
+            return true;
+        }
+
+        public MessageBus MessageBus { get; } = new MessageBus();
+
+        private Dictionary<Type, ViewModels.ViewModelBase> MainViewModels { get; } = new Dictionary<Type, ViewModels.ViewModelBase>();
+
+        private void InitializeMainViewModels()
+        {
+            ViewModels.ViewModelBase[] viewModels = {
+                new SearchConnectionViewModel(MessageBus),
+                new SearchQueryViewModel(MessageBus),
+                new SearchFacetsViewModel(MessageBus),
+                new SearchOptionsViewModel(MessageBus),
+                new SearchResultsViewModel(MessageBus),
+                new SymbologyOptionsViewModel(MessageBus),
+                new DocumentViewModel(MessageBus)
+            };
+            foreach (var viewModel in viewModels)
+                MainViewModels.Add(viewModel.GetType(), viewModel);
+        }
+
+        public T GetMainViewModel<T>() where T : ViewModels.ViewModelBase
+        {
+            if (!MainViewModels.TryGetValue(typeof(T), out ViewModels.ViewModelBase viewModel))
+                throw new InvalidOperationException($"Unable to locate main view model for type {typeof(T).FullName}");
+            return viewModel as T;
+        }
+
+        private ObservableCollection<ConnectionProfile> _registeredConnectionProfiles;
+        public ObservableCollection<ConnectionProfile> RegisteredConnectionProfiles => _registeredConnectionProfiles ?? (_registeredConnectionProfiles = new ObservableCollection<ConnectionProfile>());
 
         private void LoadConnectionProfiles()
         {
@@ -70,19 +92,5 @@ namespace MarkLogic.Esri.ArcGISPro.AddIn
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(e.ToString(), "MarkLogic", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        #region Overrides
-        /// <summary>
-        /// Called by Framework when ArcGIS Pro is closing
-        /// </summary>
-        /// <returns>False to prevent Pro from closing, otherwise True</returns>
-        protected override bool CanUnload()
-        {
-            //TODO - add your business logic
-            //return false to ~cancel~ Application close
-            return true;
-        }
-
-        #endregion Overrides
     }
 }
