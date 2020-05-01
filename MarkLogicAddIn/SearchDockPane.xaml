@@ -124,8 +124,7 @@
                                     Style="{DynamicResource Esri_ButtonBorderless}"                                     
                                     ToolTip="Get details on a particular search result"
                                     Command="{Binding InspectResults}">
-                                <TextBlock>Inspect</TextBlock>
-                                <!--Image Source="Images/GenericButtonPurple16.png" Width="16" Height="24">
+                                <Image Source="Images/Eye_18x.png" Width="16" Height="24">
                                     <Image.Style>
                                         <Style TargetType="Image">
                                             <Style.Triggers>
@@ -138,7 +137,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Image.Style>
-                                </Image -->
+                                </Image>
                             </Button>
                         </Grid>
                         <DockPanel Margin="5,0,5,0" LastChildFill="True">

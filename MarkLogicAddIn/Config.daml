@@ -42,8 +42,8 @@
               caption="Inspect" 
               className="MarkLogic.Esri.ArcGISPro.AddIn.Map.Tool.InspectResultsMapTool"
               loadOnClick="true" 
-              smallImage="Images\GenericButtonPurple16.png"
-              largeImage="Images\GenericButtonPurple32.png" 
+              smallImage="Images\Eye_18x.png"
+              largeImage="Images\Eye_36x.png" 
               condition="esri_mapping_mapPane">
           <tooltip heading="Inspect">
             Identify documents
